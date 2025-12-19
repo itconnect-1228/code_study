@@ -17,6 +17,7 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .api import api_router
 from .db.session import close_db, init_db
 
 
@@ -111,6 +112,9 @@ def create_app() -> FastAPI:
             "timestamp": datetime.now(UTC).isoformat(),
             "version": settings["app_version"],
         }
+
+    # Include API router with versioned endpoints
+    app.include_router(api_router)
 
     return app
 

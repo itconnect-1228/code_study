@@ -66,7 +66,7 @@ Web application structure (from plan.md):
 - [x] T012 [P] Implement JWT token utilities (generate, verify, decode) in backend/src/utils/jwt.py
 - [x] T013 [P] Implement password hashing utilities (bcrypt) in backend/src/utils/security.py
 - [x] T014 [P] Setup FastAPI app initialization with CORS, middleware in backend/src/main.py
-- [ ] T015 [P] Create API router structure (/api/v1) in backend/src/api/__init__.py
+- [x] T015 [P] Create API router structure (/api/v1) in backend/src/api/__init__.py
 - [ ] T016 [P] Implement error handling middleware and exception schemas in backend/src/api/exceptions.py
 - [ ] T017 [P] Setup Celery app and Redis connection in backend/src/tasks/celery_app.py
 
