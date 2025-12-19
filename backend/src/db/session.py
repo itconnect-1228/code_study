@@ -9,9 +9,10 @@ Key components:
 - AsyncEngine: Connection pool manager (one per application)
 - AsyncSession: Database session for each request
 - get_session: FastAPI dependency for automatic session management
+
+Configuration is managed by the config module (config.py).
 """
 
-import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -24,6 +25,8 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import AsyncAdaptedQueuePool
+
+from .config import DatabaseConfig, get_database_config
 
 
 class Base(DeclarativeBase):
@@ -45,54 +48,46 @@ class Base(DeclarativeBase):
 # Global engine and session maker (initialized by init_db)
 _engine: AsyncEngine | None = None
 _async_session_maker: async_sessionmaker[AsyncSession] | None = None
+_current_config: DatabaseConfig | None = None
 
 
 def get_database_url() -> str:
     """Get the database URL from environment variables.
 
-    Supports both DATABASE_URL (full URL) and individual components.
-    For async SQLAlchemy, the URL must use the asyncpg driver.
+    This function uses the config module to properly load and validate
+    database configuration, including URL encoding for special characters.
 
     Returns:
         str: The database URL with asyncpg driver.
 
     Raises:
-        ValueError: If DATABASE_URL is not set.
+        DatabaseConfigError: If required environment variables are missing.
     """
-    database_url = os.getenv("DATABASE_URL")
-
-    if database_url:
-        # Ensure we use asyncpg driver for async operations
-        if database_url.startswith("postgresql://"):
-            database_url = database_url.replace(
-                "postgresql://", "postgresql+asyncpg://", 1
-            )
-        return database_url
-
-    # Fallback to individual components
-    db_user = os.getenv("DB_USER", "postgres")
-    db_password = os.getenv("DB_PASSWORD", "postgres")
-    db_host = os.getenv("DB_HOST", "localhost")
-    db_port = os.getenv("DB_PORT", "5432")
-    db_name = os.getenv("DB_NAME", "code_learning")
-
-    return f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    config = get_database_config()
+    return config.get_connection_url()
 
 
 def init_db(
-    echo: bool = False,
-    pool_size: int = 10,
-    max_overflow: int = 20,
-    pool_timeout: int = 30,
-    pool_recycle: int = 3600,
-    pool_pre_ping: bool = True,
+    config: DatabaseConfig | None = None,
+    echo: bool | None = None,
+    pool_size: int | None = None,
+    max_overflow: int | None = None,
+    pool_timeout: int | None = None,
+    pool_recycle: int | None = None,
+    pool_pre_ping: bool | None = None,
 ) -> None:
     """Initialize the database engine and session maker.
 
     This function should be called once at application startup.
     It creates the connection pool and session factory.
 
+    Configuration can be provided in three ways (in order of precedence):
+    1. Explicit parameters (echo, pool_size, etc.)
+    2. DatabaseConfig object (config parameter)
+    3. Environment variables (via get_database_config())
+
     Args:
+        config: Optional DatabaseConfig object with all settings.
         echo: If True, log all SQL statements (useful for debugging).
         pool_size: Number of connections to maintain in the pool.
         max_overflow: Maximum additional connections beyond pool_size.
@@ -101,23 +96,51 @@ def init_db(
         pool_pre_ping: If True, test connections before use.
 
     Example:
+        # Simple startup with environment variables
         @app.on_event("startup")
         async def startup():
-            init_db(echo=True)  # Enable SQL logging in development
-    """
-    global _engine, _async_session_maker
+            init_db()
 
-    database_url = get_database_url()
+        # With explicit config
+        config = get_database_config(echo=True, pool_size=20)
+        init_db(config=config)
+
+        # Override specific settings
+        init_db(echo=True, pool_size=5)
+    """
+    global _engine, _async_session_maker, _current_config
+
+    # Load config from environment if not provided
+    if config is None:
+        config = get_database_config()
+
+    # Apply parameter overrides
+    final_echo = echo if echo is not None else config.echo
+    final_pool_size = pool_size if pool_size is not None else config.pool.pool_size
+    final_max_overflow = (
+        max_overflow if max_overflow is not None else config.pool.max_overflow
+    )
+    final_pool_timeout = (
+        pool_timeout if pool_timeout is not None else config.pool.pool_timeout
+    )
+    final_pool_recycle = (
+        pool_recycle if pool_recycle is not None else config.pool.pool_recycle
+    )
+    final_pool_pre_ping = (
+        pool_pre_ping if pool_pre_ping is not None else config.pool.pool_pre_ping
+    )
+
+    database_url = config.get_connection_url()
 
     _engine = create_async_engine(
         database_url,
-        echo=echo,
+        echo=final_echo,
         poolclass=AsyncAdaptedQueuePool,
-        pool_size=pool_size,
-        max_overflow=max_overflow,
-        pool_timeout=pool_timeout,
-        pool_recycle=pool_recycle,
-        pool_pre_ping=pool_pre_ping,
+        pool_size=final_pool_size,
+        max_overflow=final_max_overflow,
+        pool_timeout=final_pool_timeout,
+        pool_recycle=final_pool_recycle,
+        pool_pre_ping=final_pool_pre_ping,
     )
 
     _async_session_maker = async_sessionmaker(
@@ -127,6 +150,8 @@ def init_db(
         autocommit=False,
         autoflush=False,
     )
+
+    _current_config = config
 
 
 async def close_db() -> None:
@@ -140,12 +165,30 @@ async def close_db() -> None:
         async def shutdown():
             await close_db()
     """
-    global _engine, _async_session_maker
+    global _engine, _async_session_maker, _current_config
 
     if _engine is not None:
         await _engine.dispose()
         _engine = None
         _async_session_maker = None
+        _current_config = None
+
+
+def get_current_config() -> DatabaseConfig | None:
+    """Get the current database configuration.
+
+    Returns the configuration used to initialize the database,
+    or None if database is not initialized.
+
+    Returns:
+        DatabaseConfig | None: The current configuration or None.
+
+    Example:
+        config = get_current_config()
+        if config:
+            print(f"Connected to: {config.get_safe_url()}")
+    """
+    return _current_config
 
 
 def get_engine() -> AsyncEngine:

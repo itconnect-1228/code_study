@@ -12,9 +12,17 @@ Exports:
     get_engine: Get the database engine
     get_session_maker: Get the session factory
     check_db_connection: Health check for database
+    DatabaseConfig: Database configuration dataclass
+    PoolConfig: Connection pool configuration
+    get_database_config: Load configuration from environment
+    DatabaseConfigError: Configuration validation error
 
 Example:
-    from backend.src.db import Base, init_db, get_session
+    from backend.src.db import Base, init_db, get_session, get_database_config
+
+    # Load and inspect config
+    config = get_database_config()
+    print(f"Connecting to: {config.get_safe_url()}")
 
     # Define a model
     class User(Base):
@@ -30,10 +38,17 @@ Example:
         ...
 """
 
+from .config import (
+    DatabaseConfig,
+    DatabaseConfigError,
+    PoolConfig,
+    get_database_config,
+)
 from .session import (
     Base,
     check_db_connection,
     close_db,
+    get_current_config,
     get_engine,
     get_session,
     get_session_context,
@@ -43,8 +58,13 @@ from .session import (
 
 __all__ = [
     "Base",
+    "DatabaseConfig",
+    "DatabaseConfigError",
+    "PoolConfig",
     "check_db_connection",
     "close_db",
+    "get_current_config",
+    "get_database_config",
     "get_engine",
     "get_session",
     "get_session_context",

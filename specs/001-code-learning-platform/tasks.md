@@ -59,7 +59,7 @@ Web application structure (from plan.md):
 - [x] T008 Setup Alembic migrations framework in backend/alembic/
 - [x] T009 Create initial database migration with all entity schemas from data-model.md in backend/alembic/versions/001_initial_schema.py
 - [x] T010 [P] Implement database connection and session management in backend/src/db/session.py
-- [ ] T011 [P] Create database configuration and connection pooling in backend/src/db/config.py
+- [x] T011 [P] Create database configuration and connection pooling in backend/src/db/config.py
 
 ### Base Infrastructure
 
