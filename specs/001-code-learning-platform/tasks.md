@@ -37,12 +37,12 @@ Web application structure (from plan.md):
 
 - [x] T001 Create project directory structure per plan.md (backend/, frontend/, storage/, docs/)
 - [x] T001A Create docs/task-reports/ directory per constitution I-B requirement
-- [ ] T002 Initialize backend Python project with FastAPI dependencies in backend/requirements.txt
-- [ ] T003 Initialize frontend React project with Vite and TypeScript in frontend/
-- [ ] T004 [P] Create Docker Compose configuration for PostgreSQL, Redis in docker-compose.yml
-- [ ] T005 [P] Create environment configuration template in .env.example
-- [ ] T006 [P] Configure linting and formatting (Ruff, Black for Python; ESLint, Prettier for TypeScript)
-- [ ] T007 [P] Setup Git ignore patterns for node_modules, venv, .env, storage/uploads/
+- [x] T002 Initialize backend Python project with FastAPI dependencies in backend/requirements.txt
+- [x] T003 Initialize frontend React project with Vite and TypeScript in frontend/
+- [x] T004 [P] Create Docker Compose configuration for PostgreSQL, Redis in docker-compose.yml
+- [x] T005 [P] Create environment configuration template in .env.example
+- [x] T006 [P] Configure linting and formatting (Ruff, Black for Python; ESLint, Prettier for TypeScript)
+- [x] T007 [P] Setup Git ignore patterns for node_modules, venv, .env, storage/uploads/
 
 **Checkpoint**: Development environment ready for implementation
 
@@ -56,9 +56,9 @@ Web application structure (from plan.md):
 
 ### Database & Migrations
 
-- [ ] T008 Setup Alembic migrations framework in backend/alembic/
-- [ ] T009 Create initial database migration with all entity schemas from data-model.md in backend/alembic/versions/001_initial_schema.py
-- [ ] T010 [P] Implement database connection and session management in backend/src/db/session.py
+- [x] T008 Setup Alembic migrations framework in backend/alembic/
+- [x] T009 Create initial database migration with all entity schemas from data-model.md in backend/alembic/versions/001_initial_schema.py
+- [x] T010 [P] Implement database connection and session management in backend/src/db/session.py
 - [ ] T011 [P] Create database configuration and connection pooling in backend/src/db/config.py
 
 ### Base Infrastructure
