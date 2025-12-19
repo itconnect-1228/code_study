@@ -113,7 +113,7 @@ def create_app() -> FastAPI:
             "version": settings["app_version"],
         }
 
-    # Include API router with versioned endpoints
+    # Include API router with versioned endpoints (/api/v1)
     app.include_router(api_router)
 
     return app
