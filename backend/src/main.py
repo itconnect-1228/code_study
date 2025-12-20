@@ -18,6 +18,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api import api_router
+from .api.exceptions import add_exception_handlers
 from .db.session import close_db, init_db
 
 
@@ -85,6 +86,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Register exception handlers
+    add_exception_handlers(app)
 
     # Register routes
     @app.get("/")
