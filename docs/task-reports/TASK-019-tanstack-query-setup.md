@@ -62,9 +62,25 @@ const { data, isLoading, error } = useQuery({
    - 깜빡이는 화면 없이 부드러운 UX
    - 필요할 때만 수동으로 새로고침
 
+### 파일 구조
+
+```text
+frontend/src/
+├── lib/
+│   └── queryClient.ts     # QueryClient 설정 (분리된 모듈)
+├── main.tsx               # queryClient import 후 Provider 사용
+└── App.tsx
+```
+
 ### Provider 구조
 
 ```typescript
+// lib/queryClient.ts
+export const queryClient = new QueryClient({ ... })
+
+// main.tsx
+import { queryClient } from './lib/queryClient'
+
 <QueryClientProvider client={queryClient}>
   <BrowserRouter>
     <App />
@@ -72,6 +88,7 @@ const { data, isLoading, error } = useQuery({
 </QueryClientProvider>
 ```
 
+- `queryClient`를 별도 파일로 분리하여 테스트 및 재사용 용이
 - `QueryClientProvider`가 전체 앱을 감싸서 모든 컴포넌트에서 사용 가능
 - `BrowserRouter` 밖에 배치해서 라우터와 독립적으로 작동
 
@@ -111,10 +128,11 @@ const { data, isLoading, error } = useQuery({
 ## 수정/생성된 파일
 
 **생성된 파일:**
+- `frontend/src/lib/queryClient.ts` - QueryClient 설정 (분리된 모듈)
 - `frontend/src/test/query-client.test.tsx` - QueryClient 설정 및 통합 테스트 (7개)
 
 **수정된 파일:**
-- `frontend/src/main.tsx` - QueryClient 생성 및 Provider 추가
+- `frontend/src/main.tsx` - queryClient import 및 Provider 추가
 
 **사용된 기술:**
 - TanStack Query v5.14.2 (React Query v5)

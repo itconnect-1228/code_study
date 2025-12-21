@@ -73,7 +73,7 @@ Web application structure (from plan.md):
 ### Frontend Foundation
 
 - [x] T018 [P] Setup React Router with route structure in frontend/src/App.tsx
-- [x] T019 [P] Configure TanStack Query client in frontend/src/main.tsx
+- [x] T019 [P] Configure TanStack Query client in frontend/src/lib/queryClient.ts
 - [ ] T020 [P] Create API client base with axios configuration in frontend/src/services/api-client.ts
 - [ ] T021 [P] Setup Zustand auth store for JWT state in frontend/src/stores/auth-store.ts
 - [ ] T022 [P] Configure Tailwind CSS and install shadcn/ui components in frontend/

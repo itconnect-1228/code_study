@@ -1,68 +1,25 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import { queryClient } from '../lib/queryClient'
 
 describe('QueryClient Configuration', () => {
-  it('creates QueryClient with correct staleTime', () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 5 * 60 * 1000,
-          gcTime: 10 * 60 * 1000,
-          retry: 3,
-          refetchOnWindowFocus: false,
-        },
-      },
-    })
-
+  it('exports queryClient with correct staleTime', () => {
     const defaultOptions = queryClient.getDefaultOptions()
     expect(defaultOptions.queries?.staleTime).toBe(5 * 60 * 1000)
   })
 
-  it('creates QueryClient with correct gcTime', () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 5 * 60 * 1000,
-          gcTime: 10 * 60 * 1000,
-          retry: 3,
-          refetchOnWindowFocus: false,
-        },
-      },
-    })
-
+  it('exports queryClient with correct gcTime', () => {
     const defaultOptions = queryClient.getDefaultOptions()
     expect(defaultOptions.queries?.gcTime).toBe(10 * 60 * 1000)
   })
 
-  it('creates QueryClient with correct retry count', () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 5 * 60 * 1000,
-          gcTime: 10 * 60 * 1000,
-          retry: 3,
-          refetchOnWindowFocus: false,
-        },
-      },
-    })
-
+  it('exports queryClient with correct retry count', () => {
     const defaultOptions = queryClient.getDefaultOptions()
     expect(defaultOptions.queries?.retry).toBe(3)
   })
 
-  it('creates QueryClient with refetchOnWindowFocus disabled', () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 5 * 60 * 1000,
-          gcTime: 10 * 60 * 1000,
-          retry: 3,
-          refetchOnWindowFocus: false,
-        },
-      },
-    })
-
+  it('exports queryClient with refetchOnWindowFocus disabled', () => {
     const defaultOptions = queryClient.getDefaultOptions()
     expect(defaultOptions.queries?.refetchOnWindowFocus).toBe(false)
   })
@@ -95,10 +52,10 @@ describe('QueryClient Integration', () => {
   }
 
   it('useQuery hook works with QueryClientProvider', async () => {
-    const queryClient = createTestQueryClient()
+    const testClient = createTestQueryClient()
 
     render(
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={testClient}>
         <TestComponent />
       </QueryClientProvider>
     )
@@ -111,7 +68,7 @@ describe('QueryClient Integration', () => {
   })
 
   it('caches query results', async () => {
-    const queryClient = createTestQueryClient()
+    const testClient = createTestQueryClient()
     let callCount = 0
 
     const CachingTestComponent = () => {
@@ -128,7 +85,7 @@ describe('QueryClient Integration', () => {
     }
 
     const { rerender } = render(
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={testClient}>
         <CachingTestComponent />
       </QueryClientProvider>
     )
@@ -139,7 +96,7 @@ describe('QueryClient Integration', () => {
 
     // Rerender should use cached result
     rerender(
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={testClient}>
         <CachingTestComponent />
       </QueryClientProvider>
     )
@@ -149,7 +106,7 @@ describe('QueryClient Integration', () => {
   })
 
   it('handles query errors gracefully', async () => {
-    const queryClient = createTestQueryClient()
+    const testClient = createTestQueryClient()
 
     const ErrorTestComponent = () => {
       const { error, isError } = useQuery({
@@ -164,7 +121,7 @@ describe('QueryClient Integration', () => {
     }
 
     render(
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={testClient}>
         <ErrorTestComponent />
       </QueryClientProvider>
     )
