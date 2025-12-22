@@ -76,7 +76,7 @@ Web application structure (from plan.md):
 - [x] T019 [P] Configure TanStack Query client in frontend/src/lib/queryClient.ts
 - [x] T020 [P] Create API client base with axios configuration in frontend/src/services/api-client.ts
 - [x] T021 [P] Setup Zustand auth store for JWT state in frontend/src/stores/auth-store.ts
-- [ ] T022 [P] Configure Tailwind CSS and install shadcn/ui components in frontend/
+- [x] T022 [P] Configure Tailwind CSS and install shadcn/ui components in frontend/
 
 ### TDD Workflow (Constitution Requirement)
 
