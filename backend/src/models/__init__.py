@@ -6,9 +6,10 @@ and defines the structure, relationships, and constraints.
 
 Current models:
 - User: Platform user with authentication credentials
+- RefreshToken: JWT refresh tokens for authentication
 
 Example:
-    from backend.src.models import User
+    from backend.src.models import User, RefreshToken
     from backend.src.db import Base, get_session
 
     # Create a new user
@@ -17,8 +18,10 @@ Example:
     await session.commit()
 """
 
+from .refresh_token import RefreshToken
 from .user import User
 
 __all__ = [
+    "RefreshToken",
     "User",
 ]

@@ -21,6 +21,7 @@ from src.db.session import Base
 
 # Import all models to ensure they're registered with Base.metadata
 # This must happen BEFORE Base.metadata.create_all is called
+from src.models.refresh_token import RefreshToken  # noqa: F401
 from src.models.user import User  # noqa: F401
 
 
