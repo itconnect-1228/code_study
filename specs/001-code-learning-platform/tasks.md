@@ -117,7 +117,7 @@ Web application structure (from plan.md):
 
 ### Backend: Authentication Models & Services
 
-- [ ] T023 [P] Create User SQLAlchemy model in backend/src/models/user.py
+- [x] T023 [P] Create User SQLAlchemy model in backend/src/models/user.py
 - [ ] T024 [P] Create RefreshToken SQLAlchemy model in backend/src/models/refresh_token.py
 - [ ] T025 Implement UserService (register, login, logout) in backend/src/services/auth/user_service.py
 - [ ] T026 Implement TokenService (create access/refresh tokens, verify, rotate) in backend/src/services/auth/token_service.py
