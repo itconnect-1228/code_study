@@ -27,7 +27,7 @@ import re
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import CheckConstraint, Index, String
+from sqlalchemy import TIMESTAMP, CheckConstraint, Index, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db import Base
@@ -89,15 +89,18 @@ class User(Base):
         default="Complete Beginner",
     )
 
-    # Timestamp fields
+    # Timestamp fields (TIMESTAMP WITH TIME ZONE for PostgreSQL)
     created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
         default=lambda: datetime.now(UTC),
     )
     updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
     last_login_at: Mapped[datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True),
         nullable=True,
         default=None,
     )
