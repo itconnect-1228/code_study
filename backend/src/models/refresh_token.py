@@ -133,3 +133,40 @@ class RefreshToken(Base):
             str: RefreshToken representation with id and user_id.
         """
         return f"<RefreshToken(id={self.id}, user_id={self.user_id}, revoked={self.revoked})>"
+
+    @property
+    def is_expired(self) -> bool:
+        """Check if the token has expired.
+
+        Compares the current time with expires_at to determine
+        if the token is past its expiration date.
+
+        Returns:
+            bool: True if token has expired, False otherwise.
+
+        Example:
+            if token.is_expired:
+                raise InvalidTokenError("Token has expired")
+        """
+        now = datetime.now(UTC)
+        # Handle timezone-naive datetimes from SQLite
+        expires = self.expires_at
+        if expires.tzinfo is None:
+            now = now.replace(tzinfo=None)
+        return now >= expires
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if the token is still valid for use.
+
+        A token is valid if it has not been revoked AND has not expired.
+        Use this property before accepting a refresh token.
+
+        Returns:
+            bool: True if token is valid for use, False otherwise.
+
+        Example:
+            if not token.is_valid:
+                raise InvalidTokenError("Token is no longer valid")
+        """
+        return not self.revoked and not self.is_expired

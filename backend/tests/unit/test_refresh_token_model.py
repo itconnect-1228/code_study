@@ -329,3 +329,104 @@ class TestRefreshTokenRepr:
         assert str(token.id) in repr_str
         # Token hash should NOT be in repr for security
         assert "secret_hash_value" not in repr_str
+
+
+class TestRefreshTokenUtilityProperties:
+    """Tests for utility properties (is_expired, is_valid)."""
+
+    @pytest.mark.asyncio
+    async def test_is_expired_false_for_future_expiry(self, db_session):
+        """is_expired should return False when expires_at is in the future."""
+        user = User(email="not-expired@example.com", password_hash="hash")
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        token = RefreshToken(
+            user_id=user.id,
+            token_hash="hash_not_expired",
+            expires_at=datetime.now(UTC) + timedelta(days=7),
+        )
+        db_session.add(token)
+        await db_session.commit()
+        await db_session.refresh(token)
+
+        assert token.is_expired is False
+
+    @pytest.mark.asyncio
+    async def test_is_expired_true_for_past_expiry(self, db_session):
+        """is_expired should return True when expires_at is in the past."""
+        user = User(email="expired@example.com", password_hash="hash")
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        token = RefreshToken(
+            user_id=user.id,
+            token_hash="hash_expired",
+            expires_at=datetime.now(UTC) - timedelta(seconds=1),  # Already expired
+        )
+        db_session.add(token)
+        await db_session.commit()
+        await db_session.refresh(token)
+
+        assert token.is_expired is True
+
+    @pytest.mark.asyncio
+    async def test_is_valid_true_for_non_revoked_non_expired(self, db_session):
+        """is_valid should return True when not revoked and not expired."""
+        user = User(email="valid-token@example.com", password_hash="hash")
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        token = RefreshToken(
+            user_id=user.id,
+            token_hash="hash_valid",
+            expires_at=datetime.now(UTC) + timedelta(days=7),
+        )
+        db_session.add(token)
+        await db_session.commit()
+        await db_session.refresh(token)
+
+        assert token.is_valid is True
+
+    @pytest.mark.asyncio
+    async def test_is_valid_false_when_revoked(self, db_session):
+        """is_valid should return False when token is revoked."""
+        user = User(email="revoked-valid@example.com", password_hash="hash")
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        token = RefreshToken(
+            user_id=user.id,
+            token_hash="hash_revoked_check",
+            expires_at=datetime.now(UTC) + timedelta(days=7),
+            revoked=True,
+            revoked_at=datetime.now(UTC),
+        )
+        db_session.add(token)
+        await db_session.commit()
+        await db_session.refresh(token)
+
+        assert token.is_valid is False
+
+    @pytest.mark.asyncio
+    async def test_is_valid_false_when_expired(self, db_session):
+        """is_valid should return False when token is expired."""
+        user = User(email="expired-valid@example.com", password_hash="hash")
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        token = RefreshToken(
+            user_id=user.id,
+            token_hash="hash_expired_check",
+            expires_at=datetime.now(UTC) - timedelta(seconds=1),  # Expired
+        )
+        db_session.add(token)
+        await db_session.commit()
+        await db_session.refresh(token)
+
+        assert token.is_valid is False
