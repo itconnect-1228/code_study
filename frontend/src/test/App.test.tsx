@@ -19,12 +19,12 @@ describe('App Router', () => {
 
   it('renders Register page at /register', () => {
     renderWithRouter('/register')
-    expect(screen.getByRole('heading', { name: /회원가입/i })).toBeInTheDocument()
+    expect(screen.getByText(/create account/i)).toBeInTheDocument()
   })
 
   it('renders Login page at /login', () => {
     renderWithRouter('/login')
-    expect(screen.getByRole('heading', { name: /로그인/i })).toBeInTheDocument()
+    expect(screen.getByText(/welcome back/i)).toBeInTheDocument()
   })
 
   it('renders ProjectDetail page at /projects/:id', () => {
