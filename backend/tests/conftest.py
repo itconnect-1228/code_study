@@ -2,6 +2,7 @@
 
 This module provides common fixtures for testing, including:
 - Async database session with SQLite in-memory database
+- Async HTTP client for API endpoint testing
 - User factory for creating test users
 
 Note: SQLite is used for testing instead of PostgreSQL because:
@@ -15,9 +16,11 @@ by removing incompatible constraints during test setup.
 
 import pytest
 import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from src.db.session import Base
+from src.db.session import Base, get_session
+from src.main import create_app
 
 # Import all models to ensure they're registered with Base.metadata
 # This must happen BEFORE Base.metadata.create_all is called
@@ -86,3 +89,37 @@ async def db_session():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def async_client(db_session: AsyncSession):
+    """Create an async HTTP client for testing API endpoints.
+
+    This fixture:
+    1. Creates a FastAPI test app
+    2. Overrides the get_session dependency to use test database
+    3. Provides an AsyncClient for making HTTP requests
+    4. Automatically handles cleanup
+
+    Args:
+        db_session: The test database session fixture.
+
+    Yields:
+        AsyncClient: Test client for making API requests.
+    """
+    # Create test app without lifespan (no real DB connection)
+    app = create_app()
+
+    # Override database session dependency
+    async def override_get_session():
+        yield db_session
+
+    app.dependency_overrides[get_session] = override_get_session
+
+    # Create and yield client
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
+
+    # Cleanup
+    app.dependency_overrides.clear()
