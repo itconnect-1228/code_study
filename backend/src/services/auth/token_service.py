@@ -173,11 +173,8 @@ class TokenService:
             result = await self.db.execute(stmt)
             db_token = result.scalar_one_or_none()
 
-            if db_token is None:
-                return False
-            if db_token.revoked:
-                return False
-            return not db_token.is_expired
+            # Token must exist, not be revoked, and not be expired
+            return db_token is not None and db_token.is_valid
         except JWTError:
             return False
 
