@@ -35,18 +35,18 @@ const transformUser = (userData: UserResponse): User => ({
  */
 export const authService = {
   /**
-   * Register a new user
+   * Register a new user with automatic login
    * @param email - User's email address
    * @param password - User's password
-   * @returns User data
+   * @returns User data (tokens are set via HTTPOnly cookies by backend)
    */
   async register(email: string, password: string): Promise<User> {
-    const response = await apiClient.post<UserResponse>('/auth/register', {
+    const response = await apiClient.post<LoginResponse>('/auth/register', {
       email,
       password,
     })
 
-    return transformUser(response.data)
+    return transformUser(response.data.user)
   },
 
   /**
@@ -80,6 +80,17 @@ export const authService = {
     const response = await apiClient.post<LoginResponse>('/auth/refresh')
 
     return transformUser(response.data.user)
+  },
+
+  /**
+   * Get current authenticated user
+   * Used for restoring auth state on page refresh
+   * @returns Current user data
+   */
+  async getMe(): Promise<User> {
+    const response = await apiClient.get<UserResponse>('/auth/me')
+
+    return transformUser(response.data)
   },
 }
 

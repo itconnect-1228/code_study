@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ChangeEvent, type FocusEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,23 +16,68 @@ export default function LoginForm({ onSubmit, isLoading, error }: LoginFormProps
     email?: string
     password?: string
   }>({})
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+  })
+
+  // Individual field validators
+  const validateEmail = (value: string): string | undefined => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(value)) {
+      return 'Please enter a valid email address'
+    }
+    return undefined
+  }
+
+  const validatePassword = (value: string): string | undefined => {
+    if (!value) {
+      return 'Password is required'
+    }
+    return undefined
+  }
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {}
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      newErrors.email = 'Please enter a valid email address'
-    }
+    const emailError = validateEmail(email)
+    if (emailError) newErrors.email = emailError
 
-    // Password validation
-    if (!password) {
-      newErrors.password = 'Password is required'
-    }
+    const passwordError = validatePassword(password)
+    if (passwordError) newErrors.password = passwordError
 
     setErrors(newErrors)
+    // Mark all fields as touched on submit
+    setTouched({ email: true, password: true })
     return Object.keys(newErrors).length === 0
+  }
+
+  // onChange handlers with real-time validation (only if field is touched)
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setEmail(value)
+    if (touched.email) {
+      setErrors(prev => ({ ...prev, email: validateEmail(value) }))
+    }
+  }
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setPassword(value)
+    if (touched.password) {
+      setErrors(prev => ({ ...prev, password: validatePassword(value) }))
+    }
+  }
+
+  // onBlur handlers to mark field as touched and validate
+  const handleEmailBlur = (_e: FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, email: true }))
+    setErrors(prev => ({ ...prev, email: validateEmail(email) }))
+  }
+
+  const handlePasswordBlur = (_e: FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, password: true }))
+    setErrors(prev => ({ ...prev, password: validatePassword(password) }))
   }
 
   const handleSubmit = (e: FormEvent) => {
@@ -57,7 +102,8 @@ export default function LoginForm({ onSubmit, isLoading, error }: LoginFormProps
           id="email"
           type="text"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={handleEmailChange}
+          onBlur={handleEmailBlur}
           placeholder="your@email.com"
           disabled={isLoading}
         />
@@ -70,7 +116,8 @@ export default function LoginForm({ onSubmit, isLoading, error }: LoginFormProps
           id="password"
           type="password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={handlePasswordChange}
+          onBlur={handlePasswordBlur}
           placeholder="Enter password"
           disabled={isLoading}
         />

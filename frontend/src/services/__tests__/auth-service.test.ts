@@ -10,12 +10,17 @@ describe('authService', () => {
   })
 
   describe('register', () => {
-    it('calls POST /auth/register with email and password', async () => {
+    it('calls POST /auth/register with email and password (auto-login)', async () => {
+      // Backend now returns LoginResponse (tokens + user) for auto-login
       const mockResponse = {
         data: {
-          id: '1',
-          email: 'test@example.com',
-          skill_level: 'beginner',
+          access_token: 'mock-token',
+          token_type: 'bearer',
+          user: {
+            id: '1',
+            email: 'test@example.com',
+            skill_level: 'beginner',
+          },
         },
       }
 

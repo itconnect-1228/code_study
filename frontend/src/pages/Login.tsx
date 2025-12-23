@@ -1,24 +1,30 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import LoginForm from '@/components/auth/LoginForm'
-import { authService } from '@/services/auth-service'
+import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { login } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
+
+  // Get the page user was trying to access before being redirected to login
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard'
 
   const handleSubmit = async (data: { email: string; password: string }) => {
     setIsLoading(true)
     setError(undefined)
 
     try {
-      await authService.login(data.email, data.password)
-      navigate('/dashboard')
+      await login(data.email, data.password)
+      navigate(from, { replace: true })
     } catch (err: unknown) {
-      const errorObj = err as { response?: { data?: { detail?: string } } }
-      const message = errorObj.response?.data?.detail || 'Login failed. Please try again.'
+      const errorObj = err as { response?: { data?: { error?: string; detail?: string } } }
+      const data = errorObj.response?.data
+      const message = data?.error || data?.detail || 'Login failed. Please try again.'
       setError(message)
     } finally {
       setIsLoading(false)

@@ -79,4 +79,66 @@ describe('LoginForm', () => {
 
     expect(screen.getByText(errorMessage)).toBeInTheDocument()
   })
+
+  // Real-time validation tests (onChange + onBlur)
+  describe('real-time validation', () => {
+    it('validates email on blur', async () => {
+      const user = userEvent.setup()
+      render(<LoginForm onSubmit={vi.fn()} />)
+
+      const emailInput = screen.getByLabelText(/email/i)
+
+      // Type invalid email and blur
+      await user.type(emailInput, 'invalid-email')
+      await user.tab() // blur
+
+      // Error should appear without submitting
+      expect(await screen.findByText(/valid email/i)).toBeInTheDocument()
+    })
+
+    it('validates email on change after being touched', async () => {
+      const user = userEvent.setup()
+      render(<LoginForm onSubmit={vi.fn()} />)
+
+      const emailInput = screen.getByLabelText(/email/i)
+
+      // Type invalid email and blur to mark as touched
+      await user.type(emailInput, 'invalid')
+      await user.tab()
+
+      // Error should appear
+      expect(await screen.findByText(/valid email/i)).toBeInTheDocument()
+
+      // Clear and type valid email
+      await user.clear(emailInput)
+      await user.type(emailInput, 'valid@email.com')
+
+      // Error should disappear
+      await waitFor(() => {
+        expect(screen.queryByText(/valid email/i)).not.toBeInTheDocument()
+      })
+    })
+
+    it('validates password on blur (required)', async () => {
+      const user = userEvent.setup()
+      render(<LoginForm onSubmit={vi.fn()} />)
+
+      const passwordInput = screen.getByLabelText(/password/i)
+
+      // Focus and blur without typing
+      await user.click(passwordInput)
+      await user.tab()
+
+      // Error should appear without submitting
+      expect(await screen.findByText(/password is required/i)).toBeInTheDocument()
+    })
+
+    it('does not show errors before field is touched', async () => {
+      render(<LoginForm onSubmit={vi.fn()} />)
+
+      // No errors should be visible initially
+      expect(screen.queryByText(/valid email/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/password is required/i)).not.toBeInTheDocument()
+    })
+  })
 })

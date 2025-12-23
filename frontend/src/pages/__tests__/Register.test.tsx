@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import Register from '../Register'
 import { authService } from '@/services/auth-service'
+import { useAuthStore } from '@/stores/auth-store'
 
 // Mock the auth service
 vi.mock('@/services/auth-service', () => ({
@@ -28,6 +29,8 @@ vi.mock('react-router-dom', async () => {
 describe('Register Page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Reset auth store
+    useAuthStore.getState().clearAuth()
   })
 
   it('renders the register form', () => {
@@ -63,7 +66,7 @@ describe('Register Page', () => {
     expect(screen.getByRole('link', { name: /login|sign in/i })).toBeInTheDocument()
   })
 
-  it('calls register service and navigates to login on success', async () => {
+  it('calls register service, updates auth store, and navigates to dashboard on success', async () => {
     const user = userEvent.setup()
     vi.mocked(authService.register).mockResolvedValue({
       id: '123',
@@ -86,8 +89,17 @@ describe('Register Page', () => {
       expect(authService.register).toHaveBeenCalledWith('test@example.com', 'password123')
     })
 
+    // Should update auth store with user data (auto-login)
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/login', expect.any(Object))
+      const state = useAuthStore.getState()
+      expect(state.isAuthenticated).toBe(true)
+      expect(state.user).not.toBeNull()
+      expect(state.user?.email).toBe('test@example.com')
+    })
+
+    // Should navigate to dashboard instead of login
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/')
     })
   })
 

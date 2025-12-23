@@ -5,6 +5,7 @@ This module provides authentication endpoints:
 - POST /auth/login - User login with JWT (T029)
 - POST /auth/logout - User logout (T030)
 - POST /auth/refresh - Token refresh (T031)
+- GET /auth/me - Get current authenticated user
 
 Tokens:
 - Access token: Short-lived (15 min), stored in HttpOnly cookie
@@ -45,30 +46,36 @@ COOKIE_SECURE = False  # Set to True in production with HTTPS
 COOKIE_SAMESITE = "lax"
 
 
-@router.post("/register", response_model=UserResponse, status_code=201)
+@router.post("/register", response_model=TokenResponse, status_code=201)
 async def register(
     request: RegisterRequest,
+    response: Response,
     db: AsyncSession = Depends(get_session),  # noqa: B008
-) -> User:
-    """Register a new user account.
+) -> dict:
+    """Register a new user account with automatic login.
 
     Creates a new user with email and password. Validates:
     - Email format (RFC 5322)
     - Password strength (min 8 characters)
     - Email uniqueness
 
+    After successful registration, automatically logs in the user
+    by generating JWT tokens (same as login endpoint).
+
     Args:
         request: Registration request with email and password.
+        response: FastAPI response object (for setting cookies).
         db: Database session (injected).
 
     Returns:
-        User: The newly created user (without password hash).
+        dict: Token response with access_token and user info.
 
     Raises:
         ConflictException: If email is already registered (409).
         ValidationException: If email/password validation fails (422).
     """
     user_service = UserService(db)
+    token_service = TokenService(db)
 
     # Check if email already exists
     existing_user = await user_service.get_user_by_email(request.email)
@@ -78,14 +85,41 @@ async def register(
             code="EMAIL_ALREADY_EXISTS",
         )
 
-    # Create user
+    # Create user (register commits internally)
     user = await user_service.register(
         email=request.email,
         password=request.password,
     )
-    await db.commit()
 
-    return user
+    # Generate tokens (auto-login)
+    access_token = await token_service.create_access_token(user.id)
+    refresh_token = await token_service.create_refresh_token(user.id)
+
+    # Set refresh token as HttpOnly cookie
+    response.set_cookie(
+        key=REFRESH_TOKEN_COOKIE,
+        value=refresh_token,
+        max_age=COOKIE_MAX_AGE,
+        httponly=COOKIE_HTTPONLY,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+    )
+
+    # Set access token as HttpOnly cookie (for browser-based clients)
+    response.set_cookie(
+        key=ACCESS_TOKEN_COOKIE,
+        value=access_token,
+        max_age=ACCESS_COOKIE_MAX_AGE,
+        httponly=COOKIE_HTTPONLY,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user,
+    }
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -268,3 +302,24 @@ async def refresh(
         "token_type": "bearer",
         "user": user,
     }
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user),  # noqa: B008
+) -> User:
+    """Get current authenticated user information.
+
+    Requires a valid access token. Used for restoring authentication
+    state on page refresh.
+
+    Args:
+        current_user: Authenticated user (injected via dependency).
+
+    Returns:
+        User: Current user's information.
+
+    Raises:
+        AuthenticationException: If access token is invalid/expired (401).
+    """
+    return current_user

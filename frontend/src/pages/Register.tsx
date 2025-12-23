@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import RegisterForm from '@/components/auth/RegisterForm'
 import { authService } from '@/services/auth-service'
+import { useAuthStore } from '@/stores/auth-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function Register() {
   const navigate = useNavigate()
+  const setUser = useAuthStore(state => state.setUser)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
 
@@ -14,11 +16,18 @@ export default function Register() {
     setError(undefined)
 
     try {
-      await authService.register(data.email, data.password)
-      navigate('/login', { state: { message: 'Registration successful. Please login.' } })
+      const user = await authService.register(data.email, data.password)
+      // Auto-login: Update auth store with user data (tokens are in HTTPOnly cookies)
+      setUser({
+        id: user.id,
+        email: user.email,
+        createdAt: new Date().toISOString(),
+      })
+      navigate('/')
     } catch (err: unknown) {
-      const errorObj = err as { response?: { data?: { detail?: string } } }
-      const message = errorObj.response?.data?.detail || 'Registration failed. Please try again.'
+      const errorObj = err as { response?: { data?: { error?: string; detail?: string } } }
+      const data = errorObj.response?.data
+      const message = data?.error || data?.detail || 'Registration failed. Please try again.'
       setError(message)
     } finally {
       setIsLoading(false)
