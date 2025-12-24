@@ -161,7 +161,7 @@ Web application structure (from plan.md):
 ### Backend: Project Models & Services
 
 - [x] T043 Create Project SQLAlchemy model with soft delete fields in backend/src/models/project.py
-- [ ] T044 Implement ProjectService (create, get, update, soft delete) in backend/src/services/project_service.py
+- [x] T044 Implement ProjectService (create, get, update, soft delete) in backend/src/services/project_service.py
 - [ ] T045 Implement project ownership validation in backend/src/services/project_service.py
 
 ### Backend: Project API Endpoints
