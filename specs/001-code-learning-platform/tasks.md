@@ -133,13 +133,13 @@ Web application structure (from plan.md):
 
 ### Frontend: Authentication UI
 
-- [ ] T032 [P] Create RegisterForm component in frontend/src/components/auth/RegisterForm.tsx
-- [ ] T033 [P] Create LoginForm component in frontend/src/components/auth/LoginForm.tsx
-- [ ] T034 Create authentication service (register, login, logout API calls) in frontend/src/services/auth-service.ts
-- [ ] T035 Implement Register page in frontend/src/pages/Register.tsx
-- [ ] T036 Implement Login page in frontend/src/pages/Login.tsx
-- [ ] T037 Create ProtectedRoute wrapper component in frontend/src/components/auth/ProtectedRoute.tsx
-- [ ] T038 Implement auto token refresh logic in frontend/src/hooks/useAuth.ts
+- [x] T032 [P] Create RegisterForm component in frontend/src/components/auth/RegisterForm.tsx
+- [x] T033 [P] Create LoginForm component in frontend/src/components/auth/LoginForm.tsx
+- [x] T034 Create authentication service (register, login, logout API calls) in frontend/src/services/auth-service.ts
+- [x] T035 Implement Register page in frontend/src/pages/Register.tsx
+- [x] T036 Implement Login page in frontend/src/pages/Login.tsx
+- [x] T037 Create ProtectedRoute wrapper component in frontend/src/components/auth/ProtectedRoute.tsx
+- [x] T038 Implement auto token refresh logic in frontend/src/hooks/useAuth.ts
 
 ### Browser Testing: Authentication Flow
 
@@ -160,7 +160,7 @@ Web application structure (from plan.md):
 
 ### Backend: Project Models & Services
 
-- [ ] T043 Create Project SQLAlchemy model with soft delete fields in backend/src/models/project.py
+- [x] T043 Create Project SQLAlchemy model with soft delete fields in backend/src/models/project.py
 - [ ] T044 Implement ProjectService (create, get, update, soft delete) in backend/src/services/project_service.py
 - [ ] T045 Implement project ownership validation in backend/src/services/project_service.py
 
