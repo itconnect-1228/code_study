@@ -24,6 +24,7 @@ from src.main import create_app
 
 # Import all models to ensure they're registered with Base.metadata
 # This must happen BEFORE Base.metadata.create_all is called
+from src.models.project import Project  # noqa: F401
 from src.models.refresh_token import RefreshToken  # noqa: F401
 from src.models.user import User  # noqa: F401
 
@@ -65,6 +66,20 @@ async def db_session():
             c
             for c in users_table.constraints
             if not (hasattr(c, "name") and c.name == "valid_email")
+        }
+
+    # Get the projects table metadata if it exists
+    projects_table = Base.metadata.tables.get("projects")
+    if projects_table is not None:
+        # Remove PostgreSQL-specific constraints that don't work in SQLite
+        # (char_length function and CHECK constraints)
+        projects_table.constraints = {
+            c
+            for c in projects_table.constraints
+            if not (
+                hasattr(c, "name")
+                and c.name in ("title_min_length", "valid_deletion_status")
+            )
         }
 
     # Create all tables

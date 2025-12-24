@@ -28,7 +28,7 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import TIMESTAMP, CheckConstraint, Index, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db import Base
 
@@ -103,6 +103,13 @@ class User(Base):
         TIMESTAMP(timezone=True),
         nullable=True,
         default=None,
+    )
+
+    # Relationship to Projects
+    projects = relationship(
+        "Project",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
     # Table-level constraints and indexes
