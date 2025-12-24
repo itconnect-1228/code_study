@@ -10,6 +10,8 @@ Service Layer Benefits:
 
 Available Services:
 - ProjectService: CRUD operations for projects
+  - create, get_by_id, get_by_user, update, soft_delete
+  - validate_ownership: Authorization check for project access
 - UserService: User authentication and management (auth subpackage)
 - TokenService: JWT token management (auth subpackage)
 """
