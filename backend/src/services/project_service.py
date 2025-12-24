@@ -272,6 +272,39 @@ class ProjectService:
 
         return project
 
+    async def validate_ownership(
+        self,
+        project_id: UUID,
+        user_id: UUID,
+    ) -> bool:
+        """Validate that a user owns a project.
+
+        Checks if the specified user is the owner of the given project.
+        Used for authorization before modifying or deleting a project.
+
+        Security note: Returns False for non-existent projects to prevent
+        information leakage (attacker cannot determine if a project exists).
+
+        Args:
+            project_id: UUID of the project to check.
+            user_id: UUID of the user to verify ownership for.
+
+        Returns:
+            True if the user owns the project, False otherwise.
+
+        Example:
+            if await service.validate_ownership(project_id, current_user.id):
+                # User is authorized to modify this project
+                await service.update(project_id, title="New Title")
+            else:
+                # Access denied
+                raise HTTPException(status_code=403, detail="Access denied")
+        """
+        project = await self.get_by_id(project_id)
+        if not project:
+            return False
+        return bool(project.user_id == user_id)
+
     async def _get_user(self, user_id: UUID) -> User | None:
         """Get a user by ID (internal helper).
 
