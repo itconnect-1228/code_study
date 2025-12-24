@@ -487,3 +487,71 @@ class TestProjectServiceSoftDelete:
         if deleted.trashed_at and deleted.scheduled_deletion_at:
             diff = deleted.scheduled_deletion_at - deleted.trashed_at
             assert diff.days == 30
+
+
+class TestProjectServiceOwnership:
+    """Tests for ProjectService.validate_ownership method."""
+
+    @pytest.mark.asyncio
+    async def test_validate_ownership_returns_true_for_owner(
+        self, db_session: AsyncSession
+    ):
+        """validate_ownership() should return True when user owns the project."""
+        user = User(
+            email="project-owner@example.com",
+            password_hash="hash123",
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        project = Project(user_id=user.id, title="My Project")
+        db_session.add(project)
+        await db_session.commit()
+        await db_session.refresh(project)
+
+        service = ProjectService(db_session)
+        result = await service.validate_ownership(project.id, user.id)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_validate_ownership_returns_false_for_non_owner(
+        self, db_session: AsyncSession
+    ):
+        """validate_ownership() should return False when user doesn't own project."""
+        owner = User(email="owner@example.com", password_hash="hash1")
+        other_user = User(email="other@example.com", password_hash="hash2")
+        db_session.add(owner)
+        db_session.add(other_user)
+        await db_session.commit()
+        await db_session.refresh(owner)
+        await db_session.refresh(other_user)
+
+        project = Project(user_id=owner.id, title="Owner's Project")
+        db_session.add(project)
+        await db_session.commit()
+        await db_session.refresh(project)
+
+        service = ProjectService(db_session)
+        result = await service.validate_ownership(project.id, other_user.id)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_validate_ownership_returns_false_for_nonexistent_project(
+        self, db_session: AsyncSession
+    ):
+        """validate_ownership() should return False for non-existent project."""
+        user = User(
+            email="ghost-project@example.com",
+            password_hash="hash123",
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        service = ProjectService(db_session)
+        result = await service.validate_ownership(uuid4(), user.id)
+
+        assert result is False
