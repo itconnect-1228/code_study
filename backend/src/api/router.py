@@ -15,6 +15,7 @@ from typing import Any
 from fastapi import APIRouter
 
 from .auth import router as auth_router
+from .projects import router as projects_router
 
 # Create the main API router with /api/v1 prefix
 api_router = APIRouter(prefix="/api/v1")
@@ -68,9 +69,9 @@ async def api_info() -> dict[str, Any]:
 
 # Register routers
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(projects_router, prefix="/projects", tags=["Projects"])
 
 # Future routers will be imported and included here as they are implemented:
-# from .projects import router as projects_router
 # from .tasks import router as tasks_router
 # from .documents import router as documents_router
 # from .qa import router as qa_router

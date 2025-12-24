@@ -79,3 +79,56 @@ class MessageResponse(BaseModel):
     """Generic message response schema."""
 
     message: str = Field(..., description="Response message")
+
+
+# Project schemas
+
+
+class CreateProjectRequest(BaseModel):
+    """Request schema for creating a new project."""
+
+    title: str = Field(..., min_length=1, max_length=200, description="Project title")
+    description: str | None = Field(None, max_length=2000, description="Project description")
+
+
+class UpdateProjectRequest(BaseModel):
+    """Request schema for updating a project."""
+
+    title: str | None = Field(None, min_length=1, max_length=200, description="Project title")
+    description: str | None = Field(None, max_length=2000, description="Project description")
+
+
+class ProjectResponse(BaseModel):
+    """Response schema for a single project."""
+
+    id: UUID = Field(..., description="Project unique identifier")
+    title: str = Field(..., description="Project title")
+    description: str | None = Field(None, description="Project description")
+    created_at: str = Field(..., description="Creation timestamp")
+    updated_at: str = Field(..., description="Last update timestamp")
+    last_activity_at: str = Field(..., description="Last activity timestamp")
+    deletion_status: str = Field(..., description="Deletion status (active/trashed)")
+    trashed_at: str | None = Field(None, description="Trash timestamp")
+
+    model_config = {"from_attributes": True}
+
+    @classmethod
+    def from_project(cls, project) -> "ProjectResponse":
+        """Create ProjectResponse from Project model."""
+        return cls(
+            id=project.id,
+            title=project.title,
+            description=project.description,
+            created_at=project.created_at.isoformat() if project.created_at else "",
+            updated_at=project.updated_at.isoformat() if project.updated_at else "",
+            last_activity_at=project.last_activity_at.isoformat() if project.last_activity_at else "",
+            deletion_status=project.deletion_status,
+            trashed_at=project.trashed_at.isoformat() if project.trashed_at else None,
+        )
+
+
+class ProjectListResponse(BaseModel):
+    """Response schema for project list."""
+
+    projects: list[ProjectResponse] = Field(..., description="List of projects")
+    total: int = Field(..., description="Total number of projects")
