@@ -127,6 +127,13 @@ class Project(Base):
     # Relationship to User (for eager loading if needed)
     user = relationship("User", back_populates="projects")
 
+    # Relationship to Tasks
+    tasks = relationship(
+        "Task",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
     # Table-level constraints and indexes
     __table_args__ = (
         # Title minimum length constraint (PostgreSQL)

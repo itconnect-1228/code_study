@@ -26,6 +26,7 @@ from src.main import create_app
 # This must happen BEFORE Base.metadata.create_all is called
 from src.models.project import Project  # noqa: F401
 from src.models.refresh_token import RefreshToken  # noqa: F401
+from src.models.task import Task  # noqa: F401
 from src.models.user import User  # noqa: F401
 
 
@@ -79,6 +80,26 @@ async def db_session():
             if not (
                 hasattr(c, "name")
                 and c.name in ("title_min_length", "valid_deletion_status")
+            )
+        }
+
+    # Get the tasks table metadata if it exists
+    tasks_table = Base.metadata.tables.get("tasks")
+    if tasks_table is not None:
+        # Remove PostgreSQL-specific constraints that don't work in SQLite
+        # (char_length function and CHECK constraints)
+        tasks_table.constraints = {
+            c
+            for c in tasks_table.constraints
+            if not (
+                hasattr(c, "name")
+                and c.name
+                in (
+                    "title_min_length",
+                    "description_max_length",
+                    "valid_upload_method",
+                    "valid_deletion_status",
+                )
             )
         }
 
