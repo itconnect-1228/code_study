@@ -166,20 +166,20 @@ Web application structure (from plan.md):
 
 ### Backend: Project API Endpoints
 
-- [ ] T046 Implement GET /projects endpoint in backend/src/api/projects.py
-- [ ] T047 Implement POST /projects endpoint in backend/src/api/projects.py
-- [ ] T048 Implement GET /projects/{project_id} endpoint in backend/src/api/projects.py
-- [ ] T049 Implement PATCH /projects/{project_id} endpoint in backend/src/api/projects.py
-- [ ] T050 Implement DELETE /projects/{project_id} (soft delete) endpoint in backend/src/api/projects.py
+- [x] T046 Implement GET /projects endpoint in backend/src/api/projects.py
+- [x] T047 Implement POST /projects endpoint in backend/src/api/projects.py
+- [x] T048 Implement GET /projects/{project_id} endpoint in backend/src/api/projects.py
+- [x] T049 Implement PATCH /projects/{project_id} endpoint in backend/src/api/projects.py
+- [x] T050 Implement DELETE /projects/{project_id} (soft delete) endpoint in backend/src/api/projects.py
 
 ### Frontend: Project UI
 
-- [ ] T051 [P] Create ProjectCard component in frontend/src/components/project/ProjectCard.tsx
-- [ ] T052 [P] Create CreateProjectModal component in frontend/src/components/project/CreateProjectModal.tsx
-- [ ] T053 Create project service (CRUD API calls) in frontend/src/services/project-service.ts
-- [ ] T054 Implement Dashboard page (project list view) in frontend/src/pages/Dashboard.tsx
-- [ ] T055 Implement ProjectDetail page with task timeline placeholder in frontend/src/pages/ProjectDetail.tsx
-- [ ] T056 Add project creation flow in Dashboard page
+- [x] T051 [P] Create ProjectCard component in frontend/src/components/project/ProjectCard.tsx
+- [x] T052 [P] Create CreateProjectModal component in frontend/src/components/project/CreateProjectModal.tsx
+- [x] T053 Create project service (CRUD API calls) in frontend/src/services/project-service.ts
+- [x] T054 Implement Dashboard page (project list view) in frontend/src/pages/Dashboard.tsx
+- [x] T055 Implement ProjectDetail page with task timeline placeholder in frontend/src/pages/ProjectDetail.tsx
+- [x] T056 Add project creation flow in Dashboard page
 
 ### Browser Testing: Project Management
 
@@ -200,7 +200,7 @@ Web application structure (from plan.md):
 
 ### Backend: Task & Code Models
 
-- [ ] T061 [P] Create Task SQLAlchemy model with sequential task_number in backend/src/models/task.py
+- [x] T061 [P] Create Task SQLAlchemy model with sequential task_number in backend/src/models/task.py
 - [ ] T062 [P] Create UploadedCode SQLAlchemy model in backend/src/models/uploaded_code.py
 - [ ] T063 [P] Create CodeFile SQLAlchemy model in backend/src/models/code_file.py
 - [ ] T064 Implement file validation utilities (extension, size, binary detection) in backend/src/utils/file_validator.py
