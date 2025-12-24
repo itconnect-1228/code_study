@@ -443,3 +443,99 @@ class TestProjectRepr:
         assert "Project" in repr_str
         assert "Repr Project" in repr_str
         assert str(project.id) in repr_str
+
+
+class TestProjectHelperMethods:
+    """Tests for Project helper methods."""
+
+    @pytest.mark.asyncio
+    async def test_soft_delete_method(self, db_session):
+        """soft_delete() should move project to trash with proper timestamps."""
+        user = User(
+            email="softdelete@example.com",
+            password_hash="hash707",
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        project = Project(
+            user_id=user.id,
+            title="To Be Soft Deleted",
+        )
+        db_session.add(project)
+        await db_session.commit()
+        await db_session.refresh(project)
+
+        # Use soft_delete method
+        project.soft_delete()
+        await db_session.commit()
+        await db_session.refresh(project)
+
+        assert project.deletion_status == "trashed"
+        assert project.trashed_at is not None
+        assert project.scheduled_deletion_at is not None
+        assert project.is_trashed is True
+        assert project.is_active is False
+
+    @pytest.mark.asyncio
+    async def test_restore_method(self, db_session):
+        """restore() should restore project from trash."""
+        user = User(
+            email="restore@example.com",
+            password_hash="hash808",
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        project = Project(
+            user_id=user.id,
+            title="To Be Restored",
+        )
+        db_session.add(project)
+        await db_session.commit()
+        await db_session.refresh(project)
+
+        # Soft delete then restore
+        project.soft_delete()
+        await db_session.commit()
+        await db_session.refresh(project)
+
+        project.restore()
+        await db_session.commit()
+        await db_session.refresh(project)
+
+        assert project.deletion_status == "active"
+        assert project.trashed_at is None
+        assert project.scheduled_deletion_at is None
+        assert project.is_trashed is False
+        assert project.is_active is True
+
+    @pytest.mark.asyncio
+    async def test_is_trashed_property(self, db_session):
+        """is_trashed property should return correct status."""
+        user = User(
+            email="istrashed@example.com",
+            password_hash="hash909",
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
+        project = Project(
+            user_id=user.id,
+            title="Check Trashed",
+        )
+        db_session.add(project)
+        await db_session.commit()
+        await db_session.refresh(project)
+
+        # Initially active
+        assert project.is_trashed is False
+        assert project.is_active is True
+
+        # After soft delete
+        project.soft_delete()
+        assert project.is_trashed is True
+        assert project.is_active is False

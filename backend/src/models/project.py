@@ -152,3 +152,53 @@ class Project(Base):
             str: Project representation with id and title.
         """
         return f"<Project(id={self.id}, title={self.title!r})>"
+
+    def soft_delete(self) -> None:
+        """Move project to trash with 30-day scheduled deletion.
+
+        Sets deletion_status to 'trashed', records the current timestamp
+        as trashed_at, and schedules permanent deletion for 30 days later.
+
+        Example:
+            project.soft_delete()
+            await session.commit()
+            # Project is now in trash
+        """
+        from datetime import timedelta
+
+        now = datetime.now(UTC)
+        self.deletion_status = "trashed"
+        self.trashed_at = now
+        self.scheduled_deletion_at = now + timedelta(days=30)
+
+    def restore(self) -> None:
+        """Restore project from trash.
+
+        Sets deletion_status back to 'active' and clears trash timestamps.
+
+        Example:
+            project.restore()
+            await session.commit()
+            # Project is now active again
+        """
+        self.deletion_status = "active"
+        self.trashed_at = None
+        self.scheduled_deletion_at = None
+
+    @property
+    def is_trashed(self) -> bool:
+        """Check if project is in trash.
+
+        Returns:
+            bool: True if project is in trash, False otherwise.
+        """
+        return self.deletion_status == "trashed"
+
+    @property
+    def is_active(self) -> bool:
+        """Check if project is active (not in trash).
+
+        Returns:
+            bool: True if project is active, False otherwise.
+        """
+        return self.deletion_status == "active"
