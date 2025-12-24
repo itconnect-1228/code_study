@@ -116,7 +116,7 @@ class TestProjectServiceCreate:
         service = ProjectService(db_session)
         fake_user_id = uuid4()
 
-        with pytest.raises(ValueError, match="user"):
+        with pytest.raises(ValueError, match="(?i)user"):
             await service.create(user_id=fake_user_id, title="Orphan Project")
 
 
