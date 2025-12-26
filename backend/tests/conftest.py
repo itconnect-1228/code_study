@@ -24,10 +24,12 @@ from src.main import create_app
 
 # Import all models to ensure they're registered with Base.metadata
 # This must happen BEFORE Base.metadata.create_all is called
+from src.models.code_file import CodeFile  # noqa: F401
 from src.models.project import Project  # noqa: F401
 from src.models.refresh_token import RefreshToken  # noqa: F401
 from src.models.task import Task  # noqa: F401
 from src.models.user import User  # noqa: F401
+from src.models.uploaded_code import UploadedCode  # noqa: F401
 
 
 @pytest.fixture(scope="session")

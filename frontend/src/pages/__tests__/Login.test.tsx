@@ -87,7 +87,7 @@ describe('Login Page', () => {
     })
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard')
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
     })
   })
 

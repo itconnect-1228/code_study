@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, Loader2, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +18,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { projectService } from '@/services/project-service'
+import { taskService, type TaskCreateData } from '@/services/task-service'
+import { TaskCard } from '@/components/task/TaskCard'
+import { CreateTaskModal } from '@/components/task/CreateTaskModal'
+import { toast } from 'sonner'
+
+const SUPPORTED_LANGUAGES = ['javascript', 'typescript', 'python', 'java', 'go', 'rust', 'c', 'cpp']
 
 /**
  * Format date to Korean locale string
@@ -45,12 +62,38 @@ export default function ProjectDetail() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
 
   // Fetch project
   const { data: project, isLoading, error } = useQuery({
     queryKey: ['project', id],
     queryFn: () => projectService.getProject(id!),
     enabled: !!id,
+  })
+
+  // Fetch tasks
+  const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['tasks', id],
+    queryFn: () => taskService.getTasks(id!),
+    enabled: !!id,
+  })
+
+  // Edit mutation
+  const editMutation = useMutation({
+    mutationFn: (data: { title?: string; description?: string }) =>
+      projectService.updateProject(id!, data),
+    onSuccess: (updatedProject) => {
+      queryClient.invalidateQueries({ queryKey: ['project', id] })
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      toast.success(`"${updatedProject.title}" 프로젝트가 수정되었습니다.`)
+      setShowEditDialog(false)
+    },
+    onError: () => {
+      toast.error('프로젝트 수정에 실패했습니다.')
+    },
   })
 
   // Delete mutation
@@ -61,6 +104,52 @@ export default function ProjectDetail() {
       navigate('/dashboard')
     },
   })
+
+  // Create task mutation
+  const createTaskMutation = useMutation({
+    mutationFn: (data: TaskCreateData) => taskService.createTask(id!, data),
+    onSuccess: (newTask) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', id] })
+      queryClient.invalidateQueries({ queryKey: ['project', id] })
+      toast.success(`"${newTask.title}" 태스크가 생성되었습니다.`)
+      setShowCreateTaskModal(false)
+    },
+    onError: () => {
+      toast.error('태스크 생성에 실패했습니다.')
+    },
+  })
+
+  const handleCreateTask = async (data: TaskCreateData) => {
+    await createTaskMutation.mutateAsync(data)
+  }
+
+  const tasks = tasksData?.tasks ?? []
+  const taskCount = tasksData?.total ?? 0
+
+  const handleOpenEditDialog = () => {
+    if (project) {
+      setEditTitle(project.title)
+      setEditDescription(project.description || '')
+      setShowEditDialog(true)
+    }
+  }
+
+  const handleEdit = () => {
+    const updates: { title?: string; description?: string } = {}
+
+    if (editTitle.trim() !== project?.title) {
+      updates.title = editTitle.trim()
+    }
+    if (editDescription !== (project?.description || '')) {
+      updates.description = editDescription
+    }
+
+    if (Object.keys(updates).length > 0) {
+      editMutation.mutate(updates)
+    } else {
+      setShowEditDialog(false)
+    }
+  }
 
   const handleDelete = () => {
     deleteMutation.mutate()
@@ -120,7 +209,7 @@ export default function ProjectDetail() {
           )}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" onClick={handleOpenEditDialog}>
             <Pencil className="mr-2 h-4 w-4" />
             편집
           </Button>
@@ -165,24 +254,103 @@ export default function ProjectDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg font-semibold">0개</p>
-            <p className="text-xs text-muted-foreground">Phase 5에서 구현 예정</p>
+            <p className="text-lg font-semibold">{taskCount}개</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Task Timeline Placeholder */}
+      {/* Task Timeline */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>학습 태스크 타임라인</CardTitle>
+          <Button size="sm" onClick={() => setShowCreateTaskModal(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            새 태스크
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="mb-2">아직 태스크가 없습니다.</p>
-            <p className="text-sm">Phase 5에서 코드 업로드 기능이 구현될 예정입니다.</p>
-          </div>
+          {isLoadingTasks ? (
+            <div className="space-y-4">
+              <Skeleton className="h-24" />
+              <Skeleton className="h-24" />
+            </div>
+          ) : tasks.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="mb-2">아직 태스크가 없습니다.</p>
+              <p className="text-sm">코드를 업로드하여 첫 번째 학습 태스크를 만들어보세요.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {tasks.map((task, index) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  isLast={index === tasks.length - 1}
+                />
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Create Task Modal */}
+      <CreateTaskModal
+        open={showCreateTaskModal}
+        onOpenChange={setShowCreateTaskModal}
+        onSubmit={handleCreateTask}
+        languages={SUPPORTED_LANGUAGES}
+      />
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>프로젝트 편집</DialogTitle>
+            <DialogDescription>
+              프로젝트 제목과 설명을 수정할 수 있습니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">프로젝트 제목 *</Label>
+              <Input
+                id="edit-title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="프로젝트 제목을 입력하세요"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">설명 (선택)</Label>
+              <Textarea
+                id="edit-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="프로젝트 설명을 입력하세요"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              취소
+            </Button>
+            <Button
+              onClick={handleEdit}
+              disabled={!editTitle.trim() || editMutation.isPending}
+            >
+              {editMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  저장 중...
+                </>
+              ) : (
+                '저장'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -198,7 +366,7 @@ export default function ProjectDetail() {
             <AlertDialogCancel>취소</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               {deleteMutation.isPending ? '삭제 중...' : '삭제'}
             </AlertDialogAction>

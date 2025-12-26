@@ -150,6 +150,14 @@ class Task(Base):
     # Relationship to Project (for eager loading if needed)
     project = relationship("Project", back_populates="tasks")
 
+    # Relationship to UploadedCode (one-to-one)
+    uploaded_code = relationship(
+        "UploadedCode",
+        back_populates="task",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
     # Table-level constraints and indexes
     __table_args__ = (
         # Title minimum length constraint (PostgreSQL)

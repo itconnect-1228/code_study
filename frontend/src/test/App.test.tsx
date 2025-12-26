@@ -1,20 +1,94 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from '../App'
 
+// Mock the services
+vi.mock('@/services/project-service', () => ({
+  projectService: {
+    getProjects: vi.fn().mockResolvedValue({ projects: [], total: 0 }),
+    getProject: vi.fn().mockResolvedValue({
+      id: '123',
+      title: 'Test Project',
+      description: 'Test Description',
+      createdAt: '2025-01-15T10:00:00Z',
+      lastActivityAt: '2025-01-15T10:00:00Z',
+      taskCount: 0,
+    }),
+  },
+}))
+
+vi.mock('@/services/task-service', () => ({
+  taskService: {
+    getTasks: vi.fn().mockResolvedValue({ tasks: [], total: 0 }),
+    getTask: vi.fn().mockResolvedValue({
+      id: '456',
+      taskNumber: 1,
+      title: 'Test Task',
+      status: 'completed',
+      codeLanguage: 'javascript',
+      createdAt: '2025-01-15T10:00:00Z',
+      updatedAt: '2025-01-15T10:00:00Z',
+    }),
+    getTaskCode: vi.fn().mockResolvedValue({ files: [], total: 0 }),
+  },
+}))
+
+// Mock auth store - support selector pattern
+const mockAuthState = {
+  user: { id: '1', email: 'test@example.com' },
+  isAuthenticated: true,
+  isLoading: false,
+  setUser: vi.fn(),
+  setLoading: vi.fn(),
+  clearAuth: vi.fn(),
+}
+
+vi.mock('@/stores/auth-store', () => ({
+  useAuthStore: (selector?: (state: typeof mockAuthState) => unknown) => {
+    if (selector) {
+      return selector(mockAuthState)
+    }
+    return mockAuthState
+  },
+}))
+
+// Mock pointer capture for Radix UI
+beforeEach(() => {
+  Element.prototype.hasPointerCapture = vi.fn(() => false)
+  Element.prototype.setPointerCapture = vi.fn()
+  Element.prototype.releasePointerCapture = vi.fn()
+})
+
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
+
 const renderWithRouter = (initialRoute: string) => {
+  const queryClient = createQueryClient()
   return render(
-    <MemoryRouter initialEntries={[initialRoute]}>
-      <App />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[initialRoute]}>
+        <App />
+      </MemoryRouter>
+    </QueryClientProvider>
   )
 }
 
 describe('App Router', () => {
-  it('renders Dashboard at /', () => {
+  it('renders Dashboard at /', async () => {
     renderWithRouter('/')
-    expect(screen.getByRole('heading', { name: /대시보드/i })).toBeInTheDocument()
+
+    await waitFor(() => {
+      // Dashboard shows "내 프로젝트" heading
+      expect(screen.getByRole('heading', { name: /내 프로젝트/i })).toBeInTheDocument()
+    })
   })
 
   it('renders Register page at /register', () => {
@@ -27,21 +101,30 @@ describe('App Router', () => {
     expect(screen.getByText(/welcome back/i)).toBeInTheDocument()
   })
 
-  it('renders ProjectDetail page at /projects/:id', () => {
+  it('renders ProjectDetail page at /projects/:id', async () => {
     renderWithRouter('/projects/123')
-    expect(screen.getByRole('heading', { name: /프로젝트 상세/i })).toBeInTheDocument()
-    expect(screen.getByText(/프로젝트 ID: 123/i)).toBeInTheDocument()
+
+    await waitFor(() => {
+      // ProjectDetail shows project title
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
   })
 
-  it('renders TaskDetail page at /tasks/:id', () => {
+  it('renders TaskDetail page at /tasks/:id', async () => {
     renderWithRouter('/tasks/456')
-    expect(screen.getByRole('heading', { name: /태스크 상세/i })).toBeInTheDocument()
-    expect(screen.getByText(/태스크 ID: 456/i)).toBeInTheDocument()
+
+    await waitFor(() => {
+      // TaskDetail shows task title
+      expect(screen.getByText('Test Task')).toBeInTheDocument()
+    })
   })
 
-  it('renders Trash page at /trash', () => {
+  it('renders Trash page at /trash', async () => {
     renderWithRouter('/trash')
-    expect(screen.getByRole('heading', { name: /휴지통/i })).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /휴지통/i })).toBeInTheDocument()
+    })
   })
 
   it('renders NotFound page for unknown routes', () => {
