@@ -1,37 +1,20 @@
 import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Clock, CheckCircle2, Loader2, AlertCircle, FileCode, Book, Dumbbell, MessageSquare } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, FileCode, FolderOpen, ClipboardPaste, Book, Dumbbell, MessageSquare, CheckCircle, Loader2, Clock, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { taskService } from '@/services/task-service'
-import { cn } from '@/lib/utils'
+import { documentService } from '@/services/document-service'
+import { DocumentViewer } from '@/components/document/DocumentViewer'
+import { DocumentViewerLoading } from '@/components/document/DocumentViewerLoading'
 
-type TaskStatus = 'pending' | 'generating' | 'completed' | 'error'
-
-const statusConfig = {
-  pending: {
-    label: '대기중',
-    icon: Clock,
-    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  },
-  generating: {
-    label: '생성중',
-    icon: Loader2,
-    className: 'bg-blue-100 text-blue-800 border-blue-200',
-  },
-  completed: {
-    label: '완료',
-    icon: CheckCircle2,
-    className: 'bg-green-100 text-green-800 border-green-200',
-  },
-  error: {
-    label: '오류',
-    icon: AlertCircle,
-    className: 'bg-red-100 text-red-800 border-red-200',
-  },
+const uploadMethodConfig = {
+  file: { label: '파일', icon: FileCode },
+  folder: { label: '폴더', icon: FolderOpen },
+  paste: { label: '붙여넣기', icon: ClipboardPaste },
 }
 
 function formatDate(dateString: string): string {
@@ -56,11 +39,51 @@ function formatDate(dateString: string): string {
 export default function TaskDetail() {
   const { id } = useParams<{ id: string }>()
 
+  const queryClient = useQueryClient()
+
   const { data: task, isLoading, error } = useQuery({
     queryKey: ['task', id],
     queryFn: () => taskService.getTask(id!),
     enabled: !!id,
   })
+
+  // Fetch code files for the task
+  const { data: codeFilesData } = useQuery({
+    queryKey: ['taskCode', id],
+    queryFn: () => taskService.getTaskCode(id!),
+    enabled: !!id,
+  })
+
+  // Fetch learning document
+  const { data: document, isLoading: isDocumentLoading, refetch: refetchDocument } = useQuery({
+    queryKey: ['document', id],
+    queryFn: () => documentService.getDocument(id!),
+    enabled: !!id,
+    refetchInterval: (query) => {
+      // Poll every 3 seconds if document is generating
+      const doc = query.state.data
+      if (doc?.status === 'generating') {
+        return 3000
+      }
+      return false
+    },
+  })
+
+  // Generate document mutation
+  const generateDocumentMutation = useMutation({
+    mutationFn: () => documentService.generateDocument(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document', id] })
+    },
+  })
+
+  const handleGenerateDocument = () => {
+    generateDocumentMutation.mutate()
+  }
+
+  const handleRetryDocument = () => {
+    refetchDocument()
+  }
 
   // Loading state
   if (isLoading) {
@@ -93,14 +116,15 @@ export default function TaskDetail() {
     )
   }
 
-  const status = statusConfig[task.status as TaskStatus]
-  const StatusIcon = status.icon
+  const uploadMethod = task.uploadMethod || 'file'
+  const uploadConfig = uploadMethodConfig[uploadMethod]
+  const UploadIcon = uploadConfig.icon
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Back button */}
       <Button variant="ghost" asChild className="mb-6">
-        <Link to="/dashboard">
+        <Link to={`/projects/${task.projectId}`}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           뒤로
         </Link>
@@ -111,20 +135,9 @@ export default function TaskDetail() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="text-lg font-semibold text-primary">Task {task.taskNumber}</span>
-            <Badge variant="outline" className="capitalize">
-              {task.codeLanguage}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={cn('flex items-center gap-1', status.className)}
-            >
-              <StatusIcon
-                className={cn(
-                  'h-3.5 w-3.5',
-                  task.status === 'generating' && 'animate-spin'
-                )}
-              />
-              <span>{status.label}</span>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <UploadIcon className="h-3.5 w-3.5" />
+              <span>{uploadConfig.label}</span>
             </Badge>
           </div>
           <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
@@ -158,37 +171,72 @@ export default function TaskDetail() {
               <CardTitle className="flex items-center gap-2">
                 <FileCode className="h-5 w-5" />
                 학습 문서
+                {document?.status === 'completed' && (
+                  <Badge variant="secondary" className="gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    완료
+                  </Badge>
+                )}
+                {document?.status === 'generating' && (
+                  <Badge variant="outline" className="gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    생성중
+                  </Badge>
+                )}
+                {document?.status === 'pending' && (
+                  <Badge variant="outline" className="gap-1">
+                    <Clock className="h-3 w-3" />
+                    대기중
+                  </Badge>
+                )}
+                {document?.status === 'error' && (
+                  <Badge variant="destructive" className="gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    오류
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {task.status === 'pending' && (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Clock className="mx-auto h-12 w-12 mb-4" />
-                  <p className="mb-2">문서 생성을 기다리고 있습니다.</p>
-                  <p className="text-sm">잠시 후 자동으로 시작됩니다.</p>
+            <CardContent className="p-0">
+              {/* Document content */}
+              {isDocumentLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              )}
-              {task.status === 'generating' && (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Loader2 className="mx-auto h-12 w-12 mb-4 animate-spin" />
-                  <p className="mb-2">학습 문서를 생성하고 있습니다...</p>
-                  <p className="text-sm">AI가 코드를 분석하고 있습니다. 잠시만 기다려주세요.</p>
+              ) : document?.status === 'completed' ? (
+                <div className="h-[600px]">
+                  <DocumentViewer
+                    document={document}
+                    codeFile={codeFilesData?.files?.[0]}
+                  />
                 </div>
-              )}
-              {task.status === 'completed' && (
+              ) : document?.status === 'generating' ? (
+                <DocumentViewerLoading
+                  status="generating"
+                  progress={undefined}
+                />
+              ) : document?.status === 'error' ? (
+                <DocumentViewerLoading
+                  status="error"
+                  errorMessage={document.errorMessage}
+                  onRetry={handleRetryDocument}
+                />
+              ) : (
+                /* No document or pending status */
                 <div className="text-center py-12 text-muted-foreground">
-                  <CheckCircle2 className="mx-auto h-12 w-12 mb-4 text-green-500" />
+                  <Book className="mx-auto h-12 w-12 mb-4" />
                   <p className="mb-2">학습 문서가 준비되었습니다.</p>
-                  <p className="text-sm">Phase 6에서 문서 뷰어가 구현될 예정입니다.</p>
-                </div>
-              )}
-              {task.status === 'error' && (
-                <div className="text-center py-12 text-destructive">
-                  <AlertCircle className="mx-auto h-12 w-12 mb-4" />
-                  <p className="mb-2">문서 생성 중 오류가 발생했습니다.</p>
-                  <p className="text-sm text-muted-foreground">
-                    다시 시도하거나 관리자에게 문의해주세요.
-                  </p>
+                  <p className="text-sm mb-4">AI가 코드를 분석하여 학습 문서를 생성합니다.</p>
+                  <Button onClick={handleGenerateDocument} disabled={generateDocumentMutation.isPending}>
+                    {generateDocumentMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        생성 중...
+                      </>
+                    ) : (
+                      '문서 생성'
+                    )}
+                  </Button>
                 </div>
               )}
             </CardContent>

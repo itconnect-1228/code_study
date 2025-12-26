@@ -15,6 +15,7 @@ from typing import Any
 from fastapi import APIRouter
 
 from .auth import router as auth_router
+from .documents import router as documents_router
 from .projects import router as projects_router
 from .tasks import router as tasks_router
 
@@ -58,7 +59,7 @@ async def api_info() -> dict[str, Any]:
             "auth": "/api/v1/auth/* - Authentication endpoints",
             "projects": "/api/v1/projects/* - Project management",
             "tasks": "/api/v1/tasks/* - Task management",
-            "documents": "/api/v1/documents/* - Learning documents (coming soon)",
+            "documents": "/api/v1/tasks/{task_id}/document - Learning documents",
             "practice": "/api/v1/practice/* - Practice problems (coming soon)",
             "qa": "/api/v1/questions/* - Q&A system (coming soon)",
             "progress": "/api/v1/progress/* - Progress tracking (coming soon)",
@@ -70,5 +71,6 @@ async def api_info() -> dict[str, Any]:
 
 # Register routers
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(documents_router, tags=["Documents"])
 api_router.include_router(projects_router, prefix="/projects", tags=["Projects"])
 api_router.include_router(tasks_router, tags=["Tasks"])

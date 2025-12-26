@@ -20,15 +20,35 @@ vi.mock('@/services/task-service', () => ({
   },
 }))
 
+// Mock document service
+vi.mock('@/services/document-service', () => ({
+  documentService: {
+    getDocument: vi.fn(),
+    generateDocument: vi.fn(),
+    pollDocumentStatus: vi.fn(),
+  },
+}))
+
+// Mock Monaco Editor
+vi.mock('@monaco-editor/react', () => ({
+  default: vi.fn(({ value, language }) => (
+    <div data-testid="monaco-editor" data-language={language}>
+      {value}
+    </div>
+  )),
+}))
+
 import { taskService } from '@/services/task-service'
+import { documentService } from '@/services/document-service'
 
 const mockTask = {
   id: 'task-123',
+  projectId: 'project-1',
   taskNumber: 1,
   title: 'JavaScript Async/Await',
-  status: 'completed' as const,
-  codeLanguage: 'javascript',
-  uploadType: 'file' as const,
+  description: null,
+  uploadMethod: 'file' as const,
+  deletionStatus: 'active',
   createdAt: '2025-01-15T10:30:00Z',
   updatedAt: '2025-01-15T10:30:00Z',
 }
@@ -81,6 +101,8 @@ describe('TaskDetail', () => {
     vi.clearAllMocks()
     ;(taskService.getTask as ReturnType<typeof vi.fn>).mockResolvedValue(mockTask)
     ;(taskService.getTaskCode as ReturnType<typeof vi.fn>).mockResolvedValue(mockCodeFiles)
+    ;(documentService.getDocument as ReturnType<typeof vi.fn>).mockResolvedValue(null)
+    ;(documentService.generateDocument as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'doc-1', status: 'generating' })
   })
 
   afterEach(() => {
@@ -115,11 +137,11 @@ describe('TaskDetail', () => {
       })
     })
 
-    it('displays status badge', async () => {
+    it('displays upload method badge', async () => {
       renderWithProviders()
 
       await waitFor(() => {
-        expect(screen.getByText(/완료/i)).toBeInTheDocument()
+        expect(screen.getByText(/파일/i)).toBeInTheDocument()
       })
     })
 
@@ -257,10 +279,17 @@ describe('TaskDetail', () => {
     })
   })
 
-  describe('status-specific rendering', () => {
-    it('shows generating status with spinner for generating tasks', async () => {
-      const generatingTask = { ...mockTask, status: 'generating' as const }
-      ;(taskService.getTask as ReturnType<typeof vi.fn>).mockResolvedValue(generatingTask)
+  describe('document status rendering', () => {
+    it('shows generating status when document is generating', async () => {
+      const generatingDoc = {
+        id: 'doc-1',
+        taskId: 'task-123',
+        status: 'generating',
+        chapters: {},
+        createdAt: '2025-01-01',
+        updatedAt: '2025-01-01',
+      }
+      ;(documentService.getDocument as ReturnType<typeof vi.fn>).mockResolvedValue(generatingDoc)
 
       renderWithProviders()
 
@@ -269,25 +298,32 @@ describe('TaskDetail', () => {
       })
     })
 
-    it('shows pending status for pending tasks', async () => {
-      const pendingTask = { ...mockTask, status: 'pending' as const }
-      ;(taskService.getTask as ReturnType<typeof vi.fn>).mockResolvedValue(pendingTask)
+    it('shows pending/generate button when no document exists', async () => {
+      ;(documentService.getDocument as ReturnType<typeof vi.fn>).mockResolvedValue(null)
 
       renderWithProviders()
 
       await waitFor(() => {
-        expect(screen.getByText(/대기중/i)).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /문서 생성/i })).toBeInTheDocument()
       })
     })
 
-    it('shows error status for error tasks', async () => {
-      const errorTask = { ...mockTask, status: 'error' as const }
-      ;(taskService.getTask as ReturnType<typeof vi.fn>).mockResolvedValue(errorTask)
+    it('shows error status when document has error', async () => {
+      const errorDoc = {
+        id: 'doc-1',
+        taskId: 'task-123',
+        status: 'error',
+        errorMessage: 'Failed to generate',
+        chapters: {},
+        createdAt: '2025-01-01',
+        updatedAt: '2025-01-01',
+      }
+      ;(documentService.getDocument as ReturnType<typeof vi.fn>).mockResolvedValue(errorDoc)
 
       renderWithProviders()
 
       await waitFor(() => {
-        // Should find the status badge with 오류
+        // There are multiple elements with error text (badge and loading component)
         const errorElements = screen.getAllByText(/오류/i)
         expect(errorElements.length).toBeGreaterThanOrEqual(1)
       })

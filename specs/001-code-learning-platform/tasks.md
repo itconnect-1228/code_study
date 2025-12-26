@@ -204,8 +204,8 @@ Web application structure (from plan.md):
 - [x] T062 [P] Create UploadedCode SQLAlchemy model in backend/src/models/uploaded_code.py
 - [x] T063 [P] Create CodeFile SQLAlchemy model in backend/src/models/code_file.py
 - [x] T064 Implement file validation utilities (extension, size, binary detection) in backend/src/utils/file_validator.py
-- [ ] T065 Implement language detection service using Pygments in backend/src/services/code_analysis/language_detector.py
-- [ ] T066 Implement code complexity analyzer in backend/src/services/code_analysis/complexity_analyzer.py
+- [x] T065 Implement language detection service using Pygments in backend/src/services/code_analysis/language_detector.py
+- [x] T066 Implement code complexity analyzer in backend/src/services/code_analysis/complexity_analyzer.py
 
 ### Backend: Code Upload Services
 
@@ -235,12 +235,12 @@ Web application structure (from plan.md):
 
 ### Browser Testing: Task & Code Upload
 
-- [ ] T084 Manual browser test: Create task with single file upload → verify task created with Task 1 number
-- [ ] T085 Manual browser test: Create task with folder upload → verify folder structure preserved
-- [ ] T086 Manual browser test: Create task with paste code → verify language detection
-- [ ] T087 Manual browser test: Upload 11MB file → verify rejection with error message
-- [ ] T088 Manual browser test: Upload binary file → verify rejection with error message
-- [ ] T089 Manual browser test: Create 3 tasks in sequence → verify task numbers are 1, 2, 3
+- [x] T084 Manual browser test: Create task with single file upload → verify task created with Task 1 number (Tested with Playwright MCP - 2025-12-26)
+- [x] T085 Manual browser test: Create task with folder upload → verify folder structure preserved (Tested with Playwright MCP - 2025-12-26)
+- [x] T086 Manual browser test: Create task with paste code → verify language detection (Tested with Playwright MCP - 2025-12-26, **BUG FOUND**: Python code detected as JavaScript - frontend sends user-selected language instead of auto-detecting from content)
+- [x] T087 Manual browser test: Upload 11MB file → verify rejection with error message (Tested with Playwright MCP - 2025-12-26, **UX BUG**: Shows generic error "태스크 생성에 실패했습니다" but task was actually created - error message misleading)
+- [x] T088 Manual browser test: Upload binary file → verify rejection with error message (Tested with Playwright MCP - 2025-12-26, **UX BUG**: Shows generic error message but task was actually created - validation may not be working correctly)
+- [x] T089 Manual browser test: Create 3 tasks in sequence → verify task numbers are 1, 2, 3 (Tested with Playwright MCP - 2025-12-26, ✓ PASS: Tasks correctly numbered 1, 2, 3)
 
 **Checkpoint**: Complete task creation and code upload system working in browser
 
@@ -254,10 +254,10 @@ Web application structure (from plan.md):
 
 ### Backend: Document Models & AI Integration
 
-- [ ] T090 Create LearningDocument SQLAlchemy model with JSONB content in backend/src/models/learning_document.py
-- [ ] T091 Implement Gemini API client wrapper in backend/src/services/ai/gemini_client.py
-- [ ] T092 Implement prompt templates for 7-chapter document generation in backend/src/services/ai/prompts.py
-- [ ] T093 Implement DocumentGenerationService with retry logic in backend/src/services/document/document_generation_service.py
+- [x] T090 Create LearningDocument SQLAlchemy model with JSONB content in backend/src/models/learning_document.py
+- [x] T091 Implement Gemini API client wrapper in backend/src/services/ai/gemini_client.py
+- [x] T092 Implement prompt templates for 7-chapter document generation in backend/src/services/ai/prompts.py
+- [x] T093 Implement DocumentGenerationService with retry logic in backend/src/services/document/document_generation_service.py
 
 ### Backend: Async Document Generation
 
