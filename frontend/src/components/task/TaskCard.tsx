@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
-import { FileCode, FolderOpen, ClipboardPaste, Clock, CheckCircle2, Loader2, AlertCircle } from 'lucide-react'
+import { FileCode, FolderOpen, ClipboardPaste } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { Task } from '@/services/task-service'
 
@@ -15,29 +14,6 @@ export interface TaskCardProps {
   task: Task
   onClick?: (task: Task) => void
   isLast?: boolean
-}
-
-const statusConfig = {
-  pending: {
-    label: '대기중',
-    icon: Clock,
-    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  },
-  generating: {
-    label: '생성중',
-    icon: Loader2,
-    className: 'bg-blue-100 text-blue-800 border-blue-200',
-  },
-  completed: {
-    label: '완료',
-    icon: CheckCircle2,
-    className: 'bg-green-100 text-green-800 border-green-200',
-  },
-  error: {
-    label: '오류',
-    icon: AlertCircle,
-    className: 'bg-red-100 text-red-800 border-red-200',
-  },
 }
 
 const uploadTypeConfig = {

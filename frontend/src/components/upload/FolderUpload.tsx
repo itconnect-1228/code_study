@@ -130,9 +130,9 @@ export function FolderUpload({
         ref={folderInputRef}
         type="file"
         className="hidden"
-        webkitdirectory=""
         onChange={handleFolderInputChange}
         disabled={disabled}
+        {...{ webkitdirectory: "" }}
       />
       <p className="text-xs text-muted-foreground mt-4">
         폴더 구조가 보존됩니다
