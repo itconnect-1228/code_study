@@ -11,12 +11,14 @@ const renderWithRouter = (ui: React.ReactElement) => {
 describe("TaskCard", () => {
   const defaultTask: TaskCardProps["task"] = {
     id: "task-123",
+    projectId: "project-123",
     taskNumber: 1,
     title: "테스트 태스크",
-    status: "pending",
-    codeLanguage: "javascript",
-    uploadType: "file",
+    description: null,
+    uploadMethod: "file",
+    deletionStatus: "active",
     createdAt: "2025-01-15T10:30:00Z",
+    updatedAt: "2025-01-15T10:30:00Z",
   };
 
   const mockOnClick = vi.fn();
@@ -36,10 +38,7 @@ describe("TaskCard", () => {
       expect(screen.getByText("테스트 태스크")).toBeInTheDocument();
     });
 
-    it("renders code language badge", () => {
-      renderWithRouter(<TaskCard task={defaultTask} />);
-      expect(screen.getByText(/javascript/i)).toBeInTheDocument();
-    });
+    // Note: Code language badge was removed from TaskCard component
 
     it("renders upload type indicator", () => {
       renderWithRouter(<TaskCard task={defaultTask} />);
@@ -53,30 +52,7 @@ describe("TaskCard", () => {
     });
   });
 
-  describe("status indicators", () => {
-    it("shows pending status indicator", () => {
-      renderWithRouter(<TaskCard task={defaultTask} />);
-      expect(screen.getByText(/대기중/i)).toBeInTheDocument();
-    });
-
-    it("shows generating status indicator", () => {
-      const generatingTask = { ...defaultTask, status: "generating" as const };
-      renderWithRouter(<TaskCard task={generatingTask} />);
-      expect(screen.getByText(/생성중/i)).toBeInTheDocument();
-    });
-
-    it("shows completed status indicator", () => {
-      const completedTask = { ...defaultTask, status: "completed" as const };
-      renderWithRouter(<TaskCard task={completedTask} />);
-      expect(screen.getByText(/완료/i)).toBeInTheDocument();
-    });
-
-    it("shows error status indicator", () => {
-      const errorTask = { ...defaultTask, status: "error" as const };
-      renderWithRouter(<TaskCard task={errorTask} />);
-      expect(screen.getByText(/오류/i)).toBeInTheDocument();
-    });
-  });
+  // Note: Status indicators were removed from TaskCard component
 
   describe("upload type display", () => {
     it("shows file upload type", () => {
@@ -85,13 +61,13 @@ describe("TaskCard", () => {
     });
 
     it("shows folder upload type", () => {
-      const folderTask = { ...defaultTask, uploadType: "folder" as const };
+      const folderTask = { ...defaultTask, uploadMethod: "folder" as const };
       renderWithRouter(<TaskCard task={folderTask} />);
       expect(screen.getByText(/폴더/i)).toBeInTheDocument();
     });
 
     it("shows paste upload type", () => {
-      const pasteTask = { ...defaultTask, uploadType: "paste" as const };
+      const pasteTask = { ...defaultTask, uploadMethod: "paste" as const };
       renderWithRouter(<TaskCard task={pasteTask} />);
       expect(screen.getByText(/붙여넣기/i)).toBeInTheDocument();
     });
@@ -130,13 +106,7 @@ describe("TaskCard", () => {
       expect(card).toHaveClass("hover:shadow-md");
     });
 
-    it("shows completed task with distinct styling", () => {
-      const completedTask = { ...defaultTask, status: "completed" as const };
-      renderWithRouter(<TaskCard task={completedTask} />);
-
-      const statusBadge = screen.getByText(/완료/i);
-      expect(statusBadge).toBeInTheDocument();
-    });
+    // Note: Status-based styling was removed from TaskCard component
   });
 
   describe("timeline display", () => {

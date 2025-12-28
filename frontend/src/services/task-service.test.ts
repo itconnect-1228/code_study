@@ -35,11 +35,12 @@ describe("taskService", () => {
           tasks: [
             {
               id: "task-1",
+              project_id: "project-123",
               task_number: 1,
               title: "First Task",
-              status: "completed",
-              code_language: "javascript",
-              upload_type: "file",
+              description: null,
+              upload_method: "file",
+              deletion_status: "active",
               created_at: "2025-01-15T10:30:00Z",
               updated_at: "2025-01-15T11:00:00Z",
             },
@@ -58,11 +59,12 @@ describe("taskService", () => {
       expect(result.tasks).toHaveLength(1);
       expect(result.tasks[0]).toEqual({
         id: "task-1",
+        projectId: "project-123",
         taskNumber: 1,
         title: "First Task",
-        status: "completed",
-        codeLanguage: "javascript",
-        uploadType: "file",
+        description: null,
+        uploadMethod: "file",
+        deletionStatus: "active",
         createdAt: "2025-01-15T10:30:00Z",
         updatedAt: "2025-01-15T11:00:00Z",
       });
@@ -75,11 +77,12 @@ describe("taskService", () => {
           tasks: [
             {
               id: "task-1",
+              project_id: "project-123",
               task_number: 5,
               title: "Test",
-              status: "pending",
-              code_language: "python",
-              upload_type: "folder",
+              description: "Test description",
+              upload_method: "folder",
+              deletion_status: "active",
               created_at: "2025-01-15T10:30:00Z",
               updated_at: "2025-01-15T10:30:00Z",
             },
@@ -93,8 +96,7 @@ describe("taskService", () => {
       const result = await taskService.getTasks("project-123");
 
       expect(result.tasks[0].taskNumber).toBe(5);
-      expect(result.tasks[0].codeLanguage).toBe("python");
-      expect(result.tasks[0].uploadType).toBe("folder");
+      expect(result.tasks[0].uploadMethod).toBe("folder");
       expect(result.tasks[0].createdAt).toBe("2025-01-15T10:30:00Z");
       expect(result.tasks[0].updatedAt).toBe("2025-01-15T10:30:00Z");
     });
@@ -105,11 +107,12 @@ describe("taskService", () => {
       const mockResponse = {
         data: {
           id: "task-1",
+          project_id: "project-123",
           task_number: 1,
           title: "Single Task",
-          status: "generating",
-          code_language: "typescript",
-          upload_type: "paste",
+          description: null,
+          upload_method: "paste",
+          deletion_status: "active",
           created_at: "2025-01-15T10:30:00Z",
           updated_at: "2025-01-15T10:30:00Z",
         },
@@ -121,7 +124,7 @@ describe("taskService", () => {
 
       expect(mockApiClient.get).toHaveBeenCalledWith("/tasks/task-1");
       expect(result.id).toBe("task-1");
-      expect(result.status).toBe("generating");
+      expect(result.uploadMethod).toBe("paste");
     });
   });
 
@@ -130,11 +133,12 @@ describe("taskService", () => {
       const mockResponse = {
         data: {
           id: "task-new",
+          project_id: "project-123",
           task_number: 2,
           title: "New Task",
-          status: "pending",
-          code_language: "javascript",
-          upload_type: "file",
+          description: null,
+          upload_method: "file",
+          deletion_status: "active",
           created_at: "2025-01-15T10:30:00Z",
           updated_at: "2025-01-15T10:30:00Z",
         },
@@ -168,11 +172,12 @@ describe("taskService", () => {
       const mockResponse = {
         data: {
           id: "task-folder",
+          project_id: "project-123",
           task_number: 3,
           title: "Folder Task",
-          status: "pending",
-          code_language: "javascript",
-          upload_type: "folder",
+          description: null,
+          upload_method: "folder",
+          deletion_status: "active",
           created_at: "2025-01-15T10:30:00Z",
           updated_at: "2025-01-15T10:30:00Z",
         },
@@ -193,18 +198,19 @@ describe("taskService", () => {
       const result = await taskService.createTask("project-123", taskData);
 
       expect(mockApiClient.post).toHaveBeenCalled();
-      expect(result.uploadType).toBe("folder");
+      expect(result.uploadMethod).toBe("folder");
     });
 
     it("creates a task with pasted code", async () => {
       const mockResponse = {
         data: {
           id: "task-paste",
+          project_id: "project-123",
           task_number: 4,
           title: "Paste Task",
-          status: "pending",
-          code_language: "python",
-          upload_type: "paste",
+          description: null,
+          upload_method: "paste",
+          deletion_status: "active",
           created_at: "2025-01-15T10:30:00Z",
           updated_at: "2025-01-15T10:30:00Z",
         },
@@ -222,18 +228,19 @@ describe("taskService", () => {
       const result = await taskService.createTask("project-123", taskData);
 
       expect(mockApiClient.post).toHaveBeenCalled();
-      expect(result.codeLanguage).toBe("python");
+      expect(result.uploadMethod).toBe("paste");
     });
 
     it("includes FormData with correct fields for file upload", async () => {
       const mockResponse = {
         data: {
           id: "task-1",
+          project_id: "project-123",
           task_number: 1,
           title: "Test",
-          status: "pending",
-          code_language: "javascript",
-          upload_type: "file",
+          description: null,
+          upload_method: "file",
+          deletion_status: "active",
           created_at: "2025-01-15T10:30:00Z",
           updated_at: "2025-01-15T10:30:00Z",
         },
@@ -258,11 +265,12 @@ describe("taskService", () => {
       const mockResponse = {
         data: {
           id: "task-1",
+          project_id: "project-123",
           task_number: 1,
           title: "Test",
-          status: "pending",
-          code_language: "python",
-          upload_type: "paste",
+          description: null,
+          upload_method: "paste",
+          deletion_status: "active",
           created_at: "2025-01-15T10:30:00Z",
           updated_at: "2025-01-15T10:30:00Z",
         },
@@ -288,11 +296,12 @@ describe("taskService", () => {
       const mockResponse = {
         data: {
           id: "task-1",
+          project_id: "project-123",
           task_number: 1,
           title: "Updated Title",
-          status: "completed",
-          code_language: "javascript",
-          upload_type: "file",
+          description: null,
+          upload_method: "file",
+          deletion_status: "active",
           created_at: "2025-01-15T10:30:00Z",
           updated_at: "2025-01-15T12:00:00Z",
         },

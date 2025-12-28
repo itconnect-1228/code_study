@@ -139,23 +139,7 @@ describe("ProjectDetail with Tasks", () => {
       });
     });
 
-    it("shows task status badges", async () => {
-      renderWithProviders();
-
-      await waitFor(() => {
-        expect(screen.getByText(/완료/i)).toBeInTheDocument();
-        expect(screen.getByText(/생성중/i)).toBeInTheDocument();
-      });
-    });
-
-    it("shows language badges", async () => {
-      renderWithProviders();
-
-      await waitFor(() => {
-        expect(screen.getByText(/javascript/i)).toBeInTheDocument();
-        expect(screen.getByText(/python/i)).toBeInTheDocument();
-      });
-    });
+    // Note: Status and language badges were removed from TaskCard component
   });
 
   describe("empty task state", () => {
