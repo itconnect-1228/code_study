@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ProjectCard } from '@/components/project/ProjectCard'
-import { CreateProjectModal } from '@/components/project/CreateProjectModal'
-import { projectService } from '@/services/project-service'
-import { useAuthStore } from '@/stores/auth-store'
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ProjectCard } from "@/components/project/ProjectCard";
+import { CreateProjectModal } from "@/components/project/CreateProjectModal";
+import { projectService } from "@/services/project-service";
+import { useAuthStore } from "@/stores/auth-store";
 
 /**
  * Dashboard - main page showing user's projects
@@ -17,28 +17,33 @@ import { useAuthStore } from '@/stores/auth-store'
  * - Empty state when no projects exist
  */
 export default function Dashboard() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const queryClient = useQueryClient()
-  const { user } = useAuthStore()
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
 
   // Fetch projects
   const { data, isLoading, error } = useQuery({
-    queryKey: ['projects'],
+    queryKey: ["projects"],
     queryFn: () => projectService.getProjects(),
-  })
+  });
 
   // Create project mutation
   const createMutation = useMutation({
-    mutationFn: ({ title, description }: { title: string; description?: string }) =>
-      projectService.createProject(title, description),
+    mutationFn: ({
+      title,
+      description,
+    }: {
+      title: string;
+      description?: string;
+    }) => projectService.createProject(title, description),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
-  })
+  });
 
   const handleCreateProject = async (title: string, description?: string) => {
-    await createMutation.mutateAsync({ title, description })
-  }
+    await createMutation.mutateAsync({ title, description });
+  };
 
   // Loading state
   if (isLoading) {
@@ -54,7 +59,7 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   // Error state
@@ -68,15 +73,19 @@ export default function Dashboard() {
           <p className="text-muted-foreground mb-4">
             잠시 후 다시 시도해주세요.
           </p>
-          <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}>
+          <Button
+            onClick={() =>
+              queryClient.invalidateQueries({ queryKey: ["projects"] })
+            }
+          >
             다시 시도
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
-  const projects = data?.projects ?? []
+  const projects = data?.projects ?? [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -91,8 +100,7 @@ export default function Dashboard() {
           )}
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          새 프로젝트
+          <Plus className="mr-2 h-4 w-4" />새 프로젝트
         </Button>
       </div>
 
@@ -100,13 +108,14 @@ export default function Dashboard() {
       {projects.length === 0 ? (
         // Empty state
         <div className="text-center py-12 border rounded-lg bg-muted/20">
-          <h2 className="text-xl font-semibold mb-2">아직 프로젝트가 없습니다</h2>
+          <h2 className="text-xl font-semibold mb-2">
+            아직 프로젝트가 없습니다
+          </h2>
           <p className="text-muted-foreground mb-4">
             첫 번째 프로젝트를 만들어 코드 학습을 시작해보세요!
           </p>
           <Button onClick={() => setIsCreateModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            첫 프로젝트 만들기
+            <Plus className="mr-2 h-4 w-4" />첫 프로젝트 만들기
           </Button>
         </div>
       ) : (
@@ -131,5 +140,5 @@ export default function Dashboard() {
         onSubmit={handleCreateProject}
       />
     </div>
-  )
+  );
 }

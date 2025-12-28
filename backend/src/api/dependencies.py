@@ -84,7 +84,7 @@ def _decode_access_token(token: str) -> UUID:
 
 async def get_current_user(
     request: Request,
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    db: AsyncSession = Depends(get_session),
 ) -> User:
     """Get the current authenticated user from the access token.
 
@@ -136,7 +136,7 @@ async def get_current_user(
 
 async def get_current_user_optional(
     request: Request,
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    db: AsyncSession = Depends(get_session),
 ) -> User | None:
     """Get the current user if authenticated, otherwise None.
 

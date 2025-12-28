@@ -1,10 +1,10 @@
-import { type ReactNode } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
-import { useAuthStore } from '@/stores/auth-store'
+import { type ReactNode } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface ProtectedRouteProps {
-  children: ReactNode
-  redirectTo?: string
+  children: ReactNode;
+  redirectTo?: string;
 }
 
 /**
@@ -25,21 +25,24 @@ interface ProtectedRouteProps {
  * />
  * ```
  */
-export default function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRouteProps) {
-  const location = useLocation()
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated)
-  const isLoading = useAuthStore(state => state.isLoading)
+export default function ProtectedRoute({
+  children,
+  redirectTo = "/login",
+}: ProtectedRouteProps) {
+  const location = useLocation();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   // Show nothing while loading auth state
   if (isLoading) {
-    return null
+    return null;
   }
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to={redirectTo} state={{ from: location }} replace />
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
   // Render children if authenticated
-  return <>{children}</>
+  return <>{children}</>;
 }

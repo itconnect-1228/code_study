@@ -1,84 +1,84 @@
-import { apiClient } from './api-client'
+import { apiClient } from "./api-client";
 
 /**
  * Backend task response format (snake_case)
  */
 interface TaskResponseDTO {
-  id: string
-  project_id: string
-  task_number: number
-  title: string
-  description: string | null
-  upload_method: 'file' | 'folder' | 'paste' | null
-  deletion_status: string
-  created_at: string
-  updated_at: string
+  id: string;
+  project_id: string;
+  task_number: number;
+  title: string;
+  description: string | null;
+  upload_method: "file" | "folder" | "paste" | null;
+  deletion_status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface TaskListResponseDTO {
-  tasks: TaskResponseDTO[]
-  total: number
+  tasks: TaskResponseDTO[];
+  total: number;
 }
 
 interface CodeFileResponseDTO {
-  id: string
-  filename: string
-  relative_path: string
-  content: string
-  language: string
-  line_count: number
-  size_bytes: number
+  id: string;
+  filename: string;
+  relative_path: string;
+  content: string;
+  language: string;
+  line_count: number;
+  size_bytes: number;
 }
 
 interface CodeFilesResponseDTO {
-  files: CodeFileResponseDTO[]
-  total: number
+  files: CodeFileResponseDTO[];
+  total: number;
 }
 
 /**
  * Frontend task format (camelCase)
  */
 export interface Task {
-  id: string
-  projectId: string
-  taskNumber: number
-  title: string
-  description: string | null
-  uploadMethod: 'file' | 'folder' | 'paste' | null
-  deletionStatus: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  projectId: string;
+  taskNumber: number;
+  title: string;
+  description: string | null;
+  uploadMethod: "file" | "folder" | "paste" | null;
+  deletionStatus: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TaskListResponse {
-  tasks: Task[]
-  total: number
+  tasks: Task[];
+  total: number;
 }
 
 export interface CodeFile {
-  id: string
-  filename: string
-  relativePath: string
-  content: string
-  language: string
-  lineCount: number
-  sizeBytes: number
+  id: string;
+  filename: string;
+  relativePath: string;
+  content: string;
+  language: string;
+  lineCount: number;
+  sizeBytes: number;
 }
 
 export interface CodeFilesResponse {
-  files: CodeFile[]
-  total: number
+  files: CodeFile[];
+  total: number;
 }
 
 /**
  * Data for creating a new task
  */
 export interface TaskCreateData {
-  title: string
-  uploadType: 'file' | 'folder' | 'paste'
-  files?: File[]
-  code?: string
-  language?: string
+  title: string;
+  uploadType: "file" | "folder" | "paste";
+  files?: File[];
+  code?: string;
+  language?: string;
 }
 
 /**
@@ -94,7 +94,7 @@ const transformTask = (dto: TaskResponseDTO): Task => ({
   deletionStatus: dto.deletion_status,
   createdAt: dto.created_at,
   updatedAt: dto.updated_at,
-})
+});
 
 /**
  * Transform backend code file format to frontend format
@@ -107,7 +107,7 @@ const transformCodeFile = (dto: CodeFileResponseDTO): CodeFile => ({
   language: dto.language,
   lineCount: dto.line_count,
   sizeBytes: dto.size_bytes,
-})
+});
 
 /**
  * Task service - handles all task-related API calls
@@ -119,12 +119,14 @@ export const taskService = {
    * @returns List of tasks
    */
   async getTasks(projectId: string): Promise<TaskListResponse> {
-    const response = await apiClient.get<TaskListResponseDTO>(`/projects/${projectId}/tasks`)
+    const response = await apiClient.get<TaskListResponseDTO>(
+      `/projects/${projectId}/tasks`,
+    );
 
     return {
       tasks: response.data.tasks.map(transformTask),
       total: response.data.total,
-    }
+    };
   },
 
   /**
@@ -133,9 +135,9 @@ export const taskService = {
    * @returns Task data
    */
   async getTask(taskId: string): Promise<Task> {
-    const response = await apiClient.get<TaskResponseDTO>(`/tasks/${taskId}`)
+    const response = await apiClient.get<TaskResponseDTO>(`/tasks/${taskId}`);
 
-    return transformTask(response.data)
+    return transformTask(response.data);
   },
 
   /**
@@ -145,21 +147,21 @@ export const taskService = {
    * @returns Created task
    */
   async createTask(projectId: string, data: TaskCreateData): Promise<Task> {
-    const formData = new FormData()
-    formData.append('title', data.title)
-    formData.append('upload_type', data.uploadType)
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("upload_type", data.uploadType);
 
-    if (data.uploadType === 'paste') {
+    if (data.uploadType === "paste") {
       if (data.code) {
-        formData.append('code', data.code)
+        formData.append("code", data.code);
       }
       if (data.language) {
-        formData.append('language', data.language)
+        formData.append("language", data.language);
       }
     } else if (data.files) {
       data.files.forEach((file) => {
-        formData.append('files', file)
-      })
+        formData.append("files", file);
+      });
     }
 
     const response = await apiClient.post<TaskResponseDTO>(
@@ -167,12 +169,12 @@ export const taskService = {
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
-      }
-    )
+      },
+    );
 
-    return transformTask(response.data)
+    return transformTask(response.data);
   },
 
   /**
@@ -182,9 +184,12 @@ export const taskService = {
    * @returns Updated task
    */
   async updateTask(taskId: string, data: { title?: string }): Promise<Task> {
-    const response = await apiClient.patch<TaskResponseDTO>(`/tasks/${taskId}`, data)
+    const response = await apiClient.patch<TaskResponseDTO>(
+      `/tasks/${taskId}`,
+      data,
+    );
 
-    return transformTask(response.data)
+    return transformTask(response.data);
   },
 
   /**
@@ -192,7 +197,7 @@ export const taskService = {
    * @param taskId - Task ID
    */
   async deleteTask(taskId: string): Promise<void> {
-    await apiClient.delete(`/tasks/${taskId}`)
+    await apiClient.delete(`/tasks/${taskId}`);
   },
 
   /**
@@ -201,13 +206,15 @@ export const taskService = {
    * @returns Code files with content
    */
   async getTaskCode(taskId: string): Promise<CodeFilesResponse> {
-    const response = await apiClient.get<CodeFilesResponseDTO>(`/tasks/${taskId}/code`)
+    const response = await apiClient.get<CodeFilesResponseDTO>(
+      `/tasks/${taskId}/code`,
+    );
 
     return {
       files: response.data.files.map(transformCodeFile),
       total: response.data.total,
-    }
+    };
   },
-}
+};
 
-export default taskService
+export default taskService;

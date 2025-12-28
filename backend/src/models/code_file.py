@@ -41,7 +41,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db import Base
 
-
 # Supported file extensions per FR-015
 SUPPORTED_EXTENSIONS = (
     ".py",
@@ -211,7 +210,10 @@ class CodeFile(Base):
         Raises:
             ValueError: If file_extension is not in the supported list.
         """
-        if self.file_extension is not None and self.file_extension not in SUPPORTED_EXTENSIONS:
+        if (
+            self.file_extension is not None
+            and self.file_extension not in SUPPORTED_EXTENSIONS
+        ):
             raise ValueError(
                 f"File extension '{self.file_extension}' is not supported. "
                 f"Allowed extensions: {', '.join(SUPPORTED_EXTENSIONS)} (FR-015)"

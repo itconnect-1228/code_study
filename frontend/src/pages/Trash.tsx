@@ -1,9 +1,16 @@
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Trash2, AlertCircle, Loader2, Calendar, RotateCcw, X } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Trash2,
+  AlertCircle,
+  Loader2,
+  Calendar,
+  RotateCcw,
+  X,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,9 +21,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { projectService, type Project } from '@/services/project-service'
-import { toast } from 'sonner'
+} from "@/components/ui/alert-dialog";
+import { projectService, type Project } from "@/services/project-service";
+import { toast } from "sonner";
 
 /**
  * 삭제된 프로젝트 카드 컴포넌트
@@ -28,26 +35,26 @@ function TrashedProjectCard({
   isRestoring,
   isDeleting,
 }: {
-  project: Project
-  onRestore: (id: string) => void
-  onPermanentDelete: (id: string) => void
-  isRestoring: boolean
-  isDeleting: boolean
+  project: Project;
+  onRestore: (id: string) => void;
+  onPermanentDelete: (id: string) => void;
+  isRestoring: boolean;
+  isDeleting: boolean;
 }) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const trashedDate = project.trashedAt
-    ? new Date(project.trashedAt).toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+    ? new Date(project.trashedAt).toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       })
-    : '알 수 없음'
+    : "알 수 없음";
 
   const handlePermanentDelete = () => {
-    onPermanentDelete(project.id)
-    setIsDialogOpen(false)
-  }
+    onPermanentDelete(project.id);
+    setIsDialogOpen(false);
+  };
 
   return (
     <Card className="opacity-75 hover:opacity-100 transition-opacity">
@@ -123,7 +130,7 @@ function TrashedProjectCard({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 /**
@@ -133,50 +140,47 @@ function TrashedProjectCard({
  * 삭제된 프로젝트는 30일 후 영구 삭제됩니다.
  */
 export default function Trash() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-  const {
-    data,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['projects', 'trashed'],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["projects", "trashed"],
     queryFn: () => projectService.getProjects(true),
-  })
+  });
 
   const restoreMutation = useMutation({
     mutationFn: (projectId: string) => projectService.restoreProject(projectId),
     onSuccess: (restoredProject) => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success(`"${restoredProject.title}" 프로젝트가 복구되었습니다.`)
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success(`"${restoredProject.title}" 프로젝트가 복구되었습니다.`);
     },
     onError: () => {
-      toast.error('프로젝트 복구에 실패했습니다.')
+      toast.error("프로젝트 복구에 실패했습니다.");
     },
-  })
+  });
 
   const permanentDeleteMutation = useMutation({
-    mutationFn: (projectId: string) => projectService.permanentDeleteProject(projectId),
+    mutationFn: (projectId: string) =>
+      projectService.permanentDeleteProject(projectId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success('프로젝트가 영구적으로 삭제되었습니다.')
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success("프로젝트가 영구적으로 삭제되었습니다.");
     },
     onError: () => {
-      toast.error('프로젝트 삭제에 실패했습니다.')
+      toast.error("프로젝트 삭제에 실패했습니다.");
     },
-  })
+  });
 
   // 삭제된 프로젝트만 필터링
   const trashedProjects = data?.projects.filter(
-    (project: Project) => project.deletionStatus === 'trashed'
-  )
+    (project: Project) => project.deletionStatus === "trashed",
+  );
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -187,7 +191,7 @@ export default function Trash() {
           휴지통을 불러오는 중 오류가 발생했습니다.
         </AlertDescription>
       </Alert>
-    )
+    );
   }
 
   return (
@@ -221,12 +225,18 @@ export default function Trash() {
               project={project}
               onRestore={(id) => restoreMutation.mutate(id)}
               onPermanentDelete={(id) => permanentDeleteMutation.mutate(id)}
-              isRestoring={restoreMutation.isPending && restoreMutation.variables === project.id}
-              isDeleting={permanentDeleteMutation.isPending && permanentDeleteMutation.variables === project.id}
+              isRestoring={
+                restoreMutation.isPending &&
+                restoreMutation.variables === project.id
+              }
+              isDeleting={
+                permanentDeleteMutation.isPending &&
+                permanentDeleteMutation.variables === project.id
+              }
             />
           ))}
         </div>
       )}
     </div>
-  )
+  );
 }

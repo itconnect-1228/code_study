@@ -9,16 +9,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 from datetime import UTC, datetime
+
 from sqlalchemy import select
+
 from src.db.session import get_session_context, init_db
-from src.models.user import User
+from src.models.code_file import CodeFile
 from src.models.project import Project
 from src.models.task import Task
 from src.models.uploaded_code import UploadedCode
-from src.models.code_file import CodeFile
+from src.models.user import User
 from src.services.document import DocumentGenerationService
 
 TEST_CODE = """def greet(name):
@@ -65,14 +68,21 @@ async def run_test():
             print_result("Using existing User", user.email)
         print_result("User ID", user.id)
 
-        project = Project(user_id=user.id, title="Document Generation Test", description="Test")
+        project = Project(
+            user_id=user.id, title="Document Generation Test", description="Test"
+        )
         session.add(project)
         await session.commit()
         await session.refresh(project)
         print_result("Project created", project.title)
         print_result("Project ID", project.id)
 
-        task = Task(project_id=project.id, title="Python Greet Test", task_number=1, upload_method="paste")
+        task = Task(
+            project_id=project.id,
+            title="Python Greet Test",
+            task_number=1,
+            upload_method="paste",
+        )
         session.add(task)
         await session.commit()
         await session.refresh(task)
@@ -103,7 +113,9 @@ async def run_test():
             print(f"  {i:2d} | {line}")
         print("-" * 40)
 
-        storage_dir = Path(__file__).parent / "storage" / "uploads" / str(user.id) / str(task.id)
+        storage_dir = (
+            Path(__file__).parent / "storage" / "uploads" / str(user.id) / str(task.id)
+        )
         storage_dir.mkdir(parents=True, exist_ok=True)
         storage_path = storage_dir / "greet.py"
         storage_path.write_text(TEST_CODE, encoding="utf-8")
@@ -154,7 +166,15 @@ async def run_test():
         print_result("Generation Status", document.generation_status)
         print_result("is completed?", document.generation_status == "completed")
 
-        required = ["chapter1", "chapter2", "chapter3", "chapter4", "chapter5", "chapter6", "chapter7"]
+        required = [
+            "chapter1",
+            "chapter2",
+            "chapter3",
+            "chapter4",
+            "chapter5",
+            "chapter6",
+            "chapter7",
+        ]
         all_exist = all(ch in document.content for ch in required)
         print_result("All 7 chapters exist?", all_exist)
 

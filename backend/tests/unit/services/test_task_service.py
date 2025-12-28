@@ -14,11 +14,9 @@ from uuid import uuid4
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.project import Project
-from src.models.task import Task
 from src.models.user import User
 from src.services.task_service import TaskService
 
@@ -29,7 +27,6 @@ async def user(db_session: AsyncSession) -> User:
     user = User(
         email="test@example.com",
         password_hash="hashed_password",
-        
     )
     db_session.add(user)
     await db_session.commit()
@@ -426,7 +423,9 @@ class TestTaskServiceSoftDelete:
         assert deleted.scheduled_deletion_at is not None
         expected_deletion = deleted.trashed_at + timedelta(days=30)
         # Allow 1 second tolerance
-        assert abs((deleted.scheduled_deletion_at - expected_deletion).total_seconds()) < 1
+        assert (
+            abs((deleted.scheduled_deletion_at - expected_deletion).total_seconds()) < 1
+        )
 
     @pytest.mark.asyncio
     async def test_soft_delete_nonexistent_raises_error(
@@ -535,7 +534,6 @@ class TestTaskServiceValidateOwnership:
         other_user = User(
             email="other@example.com",
             password_hash="hashed_password",
-            
         )
         db_session.add(other_user)
         await db_session.commit()

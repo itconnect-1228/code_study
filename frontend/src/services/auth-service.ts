@@ -1,21 +1,21 @@
-import { apiClient } from './api-client'
+import { apiClient } from "./api-client";
 
 interface UserResponse {
-  id: string
-  email: string
-  skill_level: string
+  id: string;
+  email: string;
+  skill_level: string;
 }
 
 interface LoginResponse {
-  access_token: string
-  token_type: string
-  user: UserResponse
+  access_token: string;
+  token_type: string;
+  user: UserResponse;
 }
 
 export interface User {
-  id: string
-  email: string
-  skillLevel: string
+  id: string;
+  email: string;
+  skillLevel: string;
 }
 
 /**
@@ -25,7 +25,7 @@ const transformUser = (userData: UserResponse): User => ({
   id: userData.id,
   email: userData.email,
   skillLevel: userData.skill_level,
-})
+});
 
 /**
  * Authentication service - handles all auth-related API calls
@@ -41,12 +41,12 @@ export const authService = {
    * @returns User data (tokens are set via HTTPOnly cookies by backend)
    */
   async register(email: string, password: string): Promise<User> {
-    const response = await apiClient.post<LoginResponse>('/auth/register', {
+    const response = await apiClient.post<LoginResponse>("/auth/register", {
       email,
       password,
-    })
+    });
 
-    return transformUser(response.data.user)
+    return transformUser(response.data.user);
   },
 
   /**
@@ -56,12 +56,12 @@ export const authService = {
    * @returns User data
    */
   async login(email: string, password: string): Promise<User> {
-    const response = await apiClient.post<LoginResponse>('/auth/login', {
+    const response = await apiClient.post<LoginResponse>("/auth/login", {
       email,
       password,
-    })
+    });
 
-    return transformUser(response.data.user)
+    return transformUser(response.data.user);
   },
 
   /**
@@ -69,7 +69,7 @@ export const authService = {
    * Invalidates the refresh token cookie
    */
   async logout(): Promise<void> {
-    await apiClient.post('/auth/logout')
+    await apiClient.post("/auth/logout");
   },
 
   /**
@@ -77,9 +77,9 @@ export const authService = {
    * @returns Updated user data
    */
   async refresh(): Promise<User> {
-    const response = await apiClient.post<LoginResponse>('/auth/refresh')
+    const response = await apiClient.post<LoginResponse>("/auth/refresh");
 
-    return transformUser(response.data.user)
+    return transformUser(response.data.user);
   },
 
   /**
@@ -88,10 +88,10 @@ export const authService = {
    * @returns Current user data
    */
   async getMe(): Promise<User> {
-    const response = await apiClient.get<UserResponse>('/auth/me')
+    const response = await apiClient.get<UserResponse>("/auth/me");
 
-    return transformUser(response.data)
+    return transformUser(response.data);
   },
-}
+};
 
-export default authService
+export default authService;

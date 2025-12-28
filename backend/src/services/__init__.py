@@ -25,7 +25,7 @@ Available Services:
   - retry_failed_document: Retry failed generation
 """
 
-from src.services.project_service import ProjectService
 from src.services.document import DocumentGenerationService
+from src.services.project_service import ProjectService
 
-__all__ = ["ProjectService", "DocumentGenerationService"]
+__all__ = ["DocumentGenerationService", "ProjectService"]

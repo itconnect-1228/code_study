@@ -1,133 +1,142 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
-import Login from '../Login'
-import { authService } from '@/services/auth-service'
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { MemoryRouter } from "react-router-dom";
+import Login from "../Login";
+import { authService } from "@/services/auth-service";
 
 // Mock the auth service
-vi.mock('@/services/auth-service', () => ({
+vi.mock("@/services/auth-service", () => ({
   authService: {
     register: vi.fn(),
     login: vi.fn(),
     logout: vi.fn(),
     refresh: vi.fn(),
   },
-}))
+}));
 
 // Mock useNavigate
-const mockNavigate = vi.fn()
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom')
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
-  }
-})
+  };
+});
 
-describe('Login Page', () => {
+describe("Login Page", () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
-  it('renders the login form', () => {
+  it("renders the login form", () => {
     render(
       <MemoryRouter>
         <Login />
-      </MemoryRouter>
-    )
+      </MemoryRouter>,
+    );
 
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /login|sign in/i })).toBeInTheDocument()
-  })
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /login|sign in/i }),
+    ).toBeInTheDocument();
+  });
 
-  it('renders page title', () => {
+  it("renders page title", () => {
     render(
       <MemoryRouter>
         <Login />
-      </MemoryRouter>
-    )
+      </MemoryRouter>,
+    );
 
-    expect(screen.getByText(/welcome back/i)).toBeInTheDocument()
-  })
+    expect(screen.getByText(/welcome back/i)).toBeInTheDocument();
+  });
 
-  it('renders link to register page', () => {
+  it("renders link to register page", () => {
     render(
       <MemoryRouter>
         <Login />
-      </MemoryRouter>
-    )
+      </MemoryRouter>,
+    );
 
     expect(
-      screen.getByRole('link', { name: /register|sign up|create account/i })
-    ).toBeInTheDocument()
-  })
+      screen.getByRole("link", { name: /register|sign up|create account/i }),
+    ).toBeInTheDocument();
+  });
 
-  it('calls login service and navigates to dashboard on success', async () => {
-    const user = userEvent.setup()
+  it("calls login service and navigates to dashboard on success", async () => {
+    const user = userEvent.setup();
     vi.mocked(authService.login).mockResolvedValue({
-      id: '123',
-      email: 'test@example.com',
-      skillLevel: 'beginner',
-    } as never)
+      id: "123",
+      email: "test@example.com",
+      skillLevel: "beginner",
+    } as never);
 
     render(
       <MemoryRouter>
         <Login />
-      </MemoryRouter>
-    )
+      </MemoryRouter>,
+    );
 
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com')
-    await user.type(screen.getByLabelText(/password/i), 'password123')
-    await user.click(screen.getByRole('button', { name: /login|sign in/i }))
-
-    await waitFor(() => {
-      expect(authService.login).toHaveBeenCalledWith('test@example.com', 'password123')
-    })
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /login|sign in/i }));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
-    })
-  })
+      expect(authService.login).toHaveBeenCalledWith(
+        "test@example.com",
+        "password123",
+      );
+    });
 
-  it('displays error message on login failure', async () => {
-    const user = userEvent.setup()
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/dashboard", {
+        replace: true,
+      });
+    });
+  });
+
+  it("displays error message on login failure", async () => {
+    const user = userEvent.setup();
     vi.mocked(authService.login).mockRejectedValue({
-      response: { data: { detail: 'Invalid credentials' } },
-    })
+      response: { data: { detail: "Invalid credentials" } },
+    });
 
     render(
       <MemoryRouter>
         <Login />
-      </MemoryRouter>
-    )
+      </MemoryRouter>,
+    );
 
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com')
-    await user.type(screen.getByLabelText(/password/i), 'wrongpassword')
-    await user.click(screen.getByRole('button', { name: /login|sign in/i }))
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "wrongpassword");
+    await user.click(screen.getByRole("button", { name: /login|sign in/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
+    });
+  });
 
-  it('shows loading state while logging in', async () => {
-    const user = userEvent.setup()
+  it("shows loading state while logging in", async () => {
+    const user = userEvent.setup();
     vi.mocked(authService.login).mockImplementation(
-      () => new Promise(resolve => setTimeout(resolve, 100))
-    )
+      () => new Promise((resolve) => setTimeout(resolve, 100)),
+    );
 
     render(
       <MemoryRouter>
         <Login />
-      </MemoryRouter>
-    )
+      </MemoryRouter>,
+    );
 
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com')
-    await user.type(screen.getByLabelText(/password/i), 'password123')
-    await user.click(screen.getByRole('button', { name: /login|sign in/i }))
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /login|sign in/i }));
 
-    expect(screen.getByRole('button', { name: /logging in|signing in/i })).toBeDisabled()
-  })
-})
+    expect(
+      screen.getByRole("button", { name: /logging in|signing in/i }),
+    ).toBeDisabled();
+  });
+});

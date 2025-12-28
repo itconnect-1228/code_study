@@ -1,5 +1,5 @@
-import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 /**
  * User type - represents the authenticated user's information
@@ -8,9 +8,9 @@ import { devtools } from 'zustand/middleware'
  * This store only manages UI-relevant user information.
  */
 export interface User {
-  id: string
-  email: string
-  createdAt: string
+  id: string;
+  email: string;
+  createdAt: string;
 }
 
 /**
@@ -18,11 +18,11 @@ export interface User {
  */
 interface AuthState {
   /** Currently logged in user, or null if not authenticated */
-  user: User | null
+  user: User | null;
   /** Whether the user is currently authenticated */
-  isAuthenticated: boolean
+  isAuthenticated: boolean;
   /** Whether an auth operation (login/logout/refresh) is in progress */
-  isLoading: boolean
+  isLoading: boolean;
 }
 
 /**
@@ -30,17 +30,17 @@ interface AuthState {
  */
 interface AuthActions {
   /** Set the current user and update isAuthenticated accordingly */
-  setUser: (user: User | null) => void
+  setUser: (user: User | null) => void;
   /** Set the loading state */
-  setLoading: (loading: boolean) => void
+  setLoading: (loading: boolean) => void;
   /** Clear all auth state (used on logout) */
-  clearAuth: () => void
+  clearAuth: () => void;
 }
 
 /**
  * Combined store type
  */
-export type AuthStore = AuthState & AuthActions
+export type AuthStore = AuthState & AuthActions;
 
 /**
  * Initial authentication state
@@ -49,7 +49,7 @@ const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
-}
+};
 
 /**
  * Authentication store - manages user authentication state for the UI
@@ -71,26 +71,26 @@ const initialState: AuthState = {
  */
 export const useAuthStore = create<AuthStore>()(
   devtools(
-    set => ({
+    (set) => ({
       ...initialState,
 
-      setUser: user =>
+      setUser: (user) =>
         set(
           {
             user,
             isAuthenticated: user !== null,
           },
           false,
-          'auth/setUser'
+          "auth/setUser",
         ),
 
-      setLoading: loading =>
+      setLoading: (loading) =>
         set(
           {
             isLoading: loading,
           },
           false,
-          'auth/setLoading'
+          "auth/setLoading",
         ),
 
       clearAuth: () =>
@@ -99,15 +99,15 @@ export const useAuthStore = create<AuthStore>()(
             ...initialState,
           },
           false,
-          'auth/clearAuth'
+          "auth/clearAuth",
         ),
     }),
     {
-      name: 'auth-store',
+      name: "auth-store",
       enabled: import.meta.env.DEV,
-    }
-  )
-)
+    },
+  ),
+);
 
 // Selector hooks for optimized component subscriptions
 // These prevent unnecessary re-renders by subscribing only to specific parts of state
@@ -115,16 +115,17 @@ export const useAuthStore = create<AuthStore>()(
 /**
  * Get current user - only re-renders when user changes
  */
-export const useUser = () => useAuthStore(state => state.user)
+export const useUser = () => useAuthStore((state) => state.user);
 
 /**
  * Get authentication status - only re-renders when auth status changes
  */
-export const useIsAuthenticated = () => useAuthStore(state => state.isAuthenticated)
+export const useIsAuthenticated = () =>
+  useAuthStore((state) => state.isAuthenticated);
 
 /**
  * Get loading status - only re-renders when loading status changes
  */
-export const useAuthLoading = () => useAuthStore(state => state.isLoading)
+export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
 
-export default useAuthStore
+export default useAuthStore;

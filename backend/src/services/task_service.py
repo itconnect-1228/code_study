@@ -371,9 +371,7 @@ class TaskService:
                 await service.update(task_id, title="New Title")
         """
         stmt = (
-            select(Task)
-            .options(selectinload(Task.project))
-            .where(Task.id == task_id)
+            select(Task).options(selectinload(Task.project)).where(Task.id == task_id)
         )
         result = await self.db.execute(stmt)
         task = result.scalar_one_or_none()
@@ -395,9 +393,7 @@ class TaskService:
         Returns:
             int: Next task number (1 if no tasks exist).
         """
-        stmt = select(func.max(Task.task_number)).where(
-            Task.project_id == project_id
-        )
+        stmt = select(func.max(Task.task_number)).where(Task.project_id == project_id)
         result = await self.db.execute(stmt)
         max_number = result.scalar()
 

@@ -16,23 +16,18 @@ Test Categories:
 5. Status tracking
 """
 
-import asyncio
 import json
-from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.learning_document import LearningDocument
 from src.models.project import Project
 from src.models.task import Task
 from src.models.user import User
 from src.services.ai.gemini_client import (
-    ContentType,
     GeminiClient,
     GeminiError,
     GeminiRateLimitError,
@@ -46,7 +41,6 @@ from src.services.document.document_generation_service import (
     DocumentValidationError,
     GenerationConfig,
 )
-
 
 # Sample valid 7-chapter document content for tests
 VALID_DOCUMENT_CONTENT = {
@@ -423,8 +417,7 @@ class TestDocumentGenerationServiceValidation:
     ) -> None:
         """Should reject content with invalid chapter structure."""
         invalid_content = {
-            f"chapter{i}": {"title": f"Chapter {i}"}
-            for i in range(1, 8)
+            f"chapter{i}": {"title": f"Chapter {i}"} for i in range(1, 8)
         }
         # Chapter 2 needs concepts array
         invalid_content["chapter2"] = {"title": "Test"}  # Missing concepts
@@ -488,9 +481,7 @@ class TestDocumentGenerationServiceStatus:
         task: Task,
     ) -> None:
         """Should return failed status with error message."""
-        mock_gemini_client.generate = AsyncMock(
-            side_effect=GeminiError("Test error")
-        )
+        mock_gemini_client.generate = AsyncMock(side_effect=GeminiError("Test error"))
 
         with pytest.raises(DocumentGenerationError):
             await document_service.generate_document(
@@ -518,9 +509,7 @@ class TestDocumentGenerationServiceRetryFailed:
     ) -> None:
         """Should successfully retry a failed document."""
         # First attempt fails
-        mock_gemini_client.generate = AsyncMock(
-            side_effect=GeminiError("First error")
-        )
+        mock_gemini_client.generate = AsyncMock(side_effect=GeminiError("First error"))
 
         with pytest.raises(DocumentGenerationError):
             await document_service.generate_document(

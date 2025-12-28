@@ -54,9 +54,7 @@ def get_app_settings() -> dict[str, Any]:
     # Parse CORS origins from environment variable
     if cors_origins_env:
         cors_origins = [
-            origin.strip()
-            for origin in cors_origins_env.split(",")
-            if origin.strip()
+            origin.strip() for origin in cors_origins_env.split(",") if origin.strip()
         ]
     else:
         # Default for local development
@@ -105,7 +103,10 @@ def create_app() -> FastAPI:
     """
     print("=== Creating FastAPI app ===", flush=True)
     settings = get_app_settings()
-    print(f"=== Settings loaded: CORS origins = {settings['cors_origins']} ===", flush=True)
+    print(
+        f"=== Settings loaded: CORS origins = {settings['cors_origins']} ===",
+        flush=True,
+    )
 
     app = FastAPI(
         title=settings["app_name"],

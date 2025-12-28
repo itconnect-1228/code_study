@@ -268,7 +268,12 @@ def count_lines(content: str, language: str | None = None) -> LineCountResult:
                             # Single line docstring, treat as comment
                             comment_count += 1
                             continue
-                    if not re.search(end_pattern, line[line.index(start_pattern[0]) + 1 :] if start_pattern[0] in "/\"'" else line):
+                    if not re.search(
+                        end_pattern,
+                        line[line.index(start_pattern[0]) + 1 :]
+                        if start_pattern[0] in "/\"'"
+                        else line,
+                    ):
                         in_block_comment = True
                 comment_count += 1
                 break
@@ -573,9 +578,7 @@ def determine_complexity_level(
         return ComplexityLevel.BEGINNER
 
 
-def analyze_complexity(
-    content: str, language: str | None = None
-) -> CodeComplexity:
+def analyze_complexity(content: str, language: str | None = None) -> CodeComplexity:
     """
     Analyze code complexity and return comprehensive metrics.
 

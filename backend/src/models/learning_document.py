@@ -293,8 +293,13 @@ class LearningDocument(Base):
         if not self.content:
             return False
         required_chapters = [
-            "chapter1", "chapter2", "chapter3", "chapter4",
-            "chapter5", "chapter6", "chapter7"
+            "chapter1",
+            "chapter2",
+            "chapter3",
+            "chapter4",
+            "chapter5",
+            "chapter6",
+            "chapter7",
         ]
         return all(chapter in self.content for chapter in required_chapters)
 

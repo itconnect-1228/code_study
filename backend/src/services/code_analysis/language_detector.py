@@ -20,14 +20,14 @@ Requirements:
 from dataclasses import dataclass
 from pathlib import Path
 
-from pygments.lexers import (
-    get_lexer_for_filename,
-    get_lexer_by_name,
-    guess_lexer,
-    get_all_lexers,
-    ClassNotFound,
-)
 from pygments.lexer import Lexer
+from pygments.lexers import (
+    ClassNotFound,
+    get_all_lexers,
+    get_lexer_by_name,
+    get_lexer_for_filename,
+    guess_lexer,
+)
 
 
 @dataclass(frozen=True)
@@ -119,8 +119,7 @@ def detect_language_by_filename(filename: str) -> LanguageInfo | None:
 
 
 def detect_language_by_content(
-    content: str,
-    filename: str | None = None
+    content: str, filename: str | None = None
 ) -> LanguageInfo | None:
     """
     Detect programming language by analyzing code content.
@@ -168,8 +167,7 @@ def detect_language_by_content(
 
 
 def detect_language(
-    filename: str | None = None,
-    content: str | None = None
+    filename: str | None = None, content: str | None = None
 ) -> LanguageInfo:
     """
     Detect programming language using the best available method.

@@ -9,10 +9,11 @@ import os
 from logging.config import fileConfig
 from urllib.parse import quote_plus
 
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
+from alembic import context
 
 # Import our models and Base
 from src.db.session import Base
@@ -44,7 +45,9 @@ def get_database_url() -> str:
     if database_url:
         # Convert postgresql:// to postgresql+asyncpg://
         if database_url.startswith("postgresql://"):
-            database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            database_url = database_url.replace(
+                "postgresql://", "postgresql+asyncpg://", 1
+            )
         return database_url
 
     # Build URL from individual components

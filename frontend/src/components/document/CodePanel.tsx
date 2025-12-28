@@ -1,19 +1,19 @@
-import Editor from '@monaco-editor/react'
-import { cn } from '@/lib/utils'
+import Editor from "@monaco-editor/react";
+import { cn } from "@/lib/utils";
 
 export interface CodePanelProps {
   /** 표시할 코드 */
-  code: string
+  code: string;
   /** 프로그래밍 언어 (구문 강조용) */
-  language: string
+  language: string;
   /** 하이라이트할 라인 번호들 */
-  highlightedLines?: number[]
+  highlightedLines?: number[];
   /** 파일명 (선택사항) */
-  filename?: string
+  filename?: string;
   /** 추가 CSS 클래스 */
-  className?: string
+  className?: string;
   /** 에디터 높이 (기본값: 100%) */
-  height?: string
+  height?: string;
 }
 
 /**
@@ -31,10 +31,10 @@ export function CodePanel({
   highlightedLines = [],
   filename,
   className,
-  height = '100%',
+  height = "100%",
 }: CodePanelProps) {
   return (
-    <div className={cn('code-panel flex flex-col h-full', className)}>
+    <div className={cn("code-panel flex flex-col h-full", className)}>
       {/* 파일명 헤더 */}
       {filename && (
         <div
@@ -57,9 +57,9 @@ export function CodePanel({
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             fontSize: 14,
-            lineNumbers: 'on',
-            renderLineHighlight: 'all',
-            wordWrap: 'on',
+            lineNumbers: "on",
+            renderLineHighlight: "all",
+            wordWrap: "on",
             automaticLayout: true,
             folding: true,
             lineDecorationsWidth: 0,
@@ -73,17 +73,17 @@ export function CodePanel({
                 range: new monaco.Range(line, 1, line, 1),
                 options: {
                   isWholeLine: true,
-                  className: 'highlighted-line',
-                  glyphMarginClassName: 'highlighted-line-glyph',
+                  className: "highlighted-line",
+                  glyphMarginClassName: "highlighted-line-glyph",
                 },
-              }))
-              editor.createDecorationsCollection(decorations)
+              }));
+              editor.createDecorationsCollection(decorations);
             }
           }}
         />
       </div>
     </div>
-  )
+  );
 }
 
-export default CodePanel
+export default CodePanel;

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 export default function NotFound() {
   return (
@@ -7,5 +7,5 @@ export default function NotFound() {
       <p>요청하신 페이지가 존재하지 않습니다.</p>
       <Link to="/">대시보드로 돌아가기</Link>
     </div>
-  )
+  );
 }

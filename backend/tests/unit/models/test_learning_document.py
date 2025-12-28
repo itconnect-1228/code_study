@@ -7,15 +7,15 @@ Tests the LearningDocument SQLAlchemy model including:
 - Invalid status rejection
 """
 
-import pytest
 from uuid import uuid4
+
+import pytest
 from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import sessionmaker
 
 from src.db import Base
-from src.models import Task, Project, User, LearningDocument
-
+from src.models import LearningDocument, Project, Task, User
 
 # Test results storage
 test_results = []
@@ -23,12 +23,14 @@ test_results = []
 
 def record_result(test_name: str, expected: str, actual: str, passed: bool):
     """Record test result for summary table."""
-    test_results.append({
-        "test": test_name,
-        "expected": expected,
-        "actual": actual,
-        "passed": "PASS" if passed else "FAIL"
-    })
+    test_results.append(
+        {
+            "test": test_name,
+            "expected": expected,
+            "actual": actual,
+            "passed": "PASS" if passed else "FAIL",
+        }
+    )
 
 
 @pytest.fixture(scope="module")
@@ -59,11 +61,7 @@ def session(engine):
 @pytest.fixture(scope="module")
 def user(session):
     """Create test user."""
-    user = User(
-        id=uuid4(),
-        email="test@example.com",
-        password_hash="hashed_password"
-    )
+    user = User(id=uuid4(), email="test@example.com", password_hash="hashed_password")
     session.add(user)
     session.commit()
     return user
@@ -72,11 +70,7 @@ def user(session):
 @pytest.fixture(scope="module")
 def project(session, user):
     """Create test project."""
-    project = Project(
-        id=uuid4(),
-        user_id=user.id,
-        title="Test Project"
-    )
+    project = Project(id=uuid4(), user_id=user.id, title="Test Project")
     session.add(project)
     session.commit()
     return project
@@ -86,10 +80,7 @@ def project(session, user):
 def task(session, project):
     """Create test task."""
     task = Task(
-        id=uuid4(),
-        project_id=project.id,
-        task_number=1,
-        title="Test Task for Learning"
+        id=uuid4(), project_id=project.id, task_number=1, title="Test Task for Learning"
     )
     session.add(task)
     session.commit()
@@ -103,10 +94,7 @@ class TestLearningDocumentModel:
         """Test 1: Create LearningDocument and verify pending status."""
         test_name = "1. LearningDocument 생성 시 pending 상태"
 
-        document = LearningDocument(
-            task_id=task.id,
-            content={}
-        )
+        document = LearningDocument(task_id=task.id, content={})
         session.add(document)
         session.commit()
 
@@ -116,7 +104,7 @@ class TestLearningDocumentModel:
             test_name,
             expected="pending",
             actual=document.generation_status,
-            passed=passed
+            passed=passed,
         )
 
         assert passed, f"Expected 'pending', got '{document.generation_status}'"
@@ -128,26 +116,20 @@ class TestLearningDocumentModel:
         """Test 2: Second LearningDocument for same Task should fail."""
         test_name = "2. 동일 Task에 중복 Document 생성 시 오류"
 
-        duplicate = LearningDocument(
-            task_id=task.id,
-            content={}
-        )
+        duplicate = LearningDocument(task_id=task.id, content={})
         session.add(duplicate)
 
         try:
             session.commit()
             passed = False
             actual = "오류 없음 (문제!)"
-        except IntegrityError as e:
+        except IntegrityError:
             session.rollback()
             passed = True
             actual = "IntegrityError 발생"
 
         record_result(
-            test_name,
-            expected="IntegrityError 발생",
-            actual=actual,
-            passed=passed
+            test_name, expected="IntegrityError 발생", actual=actual, passed=passed
         )
 
         assert passed, "Duplicate document should raise IntegrityError"
@@ -165,7 +147,7 @@ class TestLearningDocumentModel:
             test_name,
             expected="in_progress",
             actual=document.generation_status,
-            passed=passed
+            passed=passed,
         )
 
         assert passed
@@ -183,7 +165,7 @@ class TestLearningDocumentModel:
             "chapter4": {"title": "Line-by-Line", "explanations": []},
             "chapter5": {"title": "Execution Flow", "steps": []},
             "chapter6": {"title": "Core Concepts", "concepts": []},
-            "chapter7": {"title": "Common Mistakes", "mistakes": []}
+            "chapter7": {"title": "Common Mistakes", "mistakes": []},
         }
         document.complete_generation(content)
         session.commit()
@@ -193,7 +175,7 @@ class TestLearningDocumentModel:
             test_name,
             expected="completed",
             actual=document.generation_status,
-            passed=passed
+            passed=passed,
         )
 
         assert passed
@@ -206,10 +188,7 @@ class TestLearningDocumentModel:
 
         passed = document.has_content is True
         record_result(
-            test_name,
-            expected="True",
-            actual=str(document.has_content),
-            passed=passed
+            test_name, expected="True", actual=str(document.has_content), passed=passed
         )
 
         assert passed
@@ -229,8 +208,8 @@ class TestLearningDocumentModel:
         # So we test that PostgreSQL CHECK constraint exists in model
         check_constraint_exists = False
         for constraint in LearningDocument.__table_args__:
-            if hasattr(constraint, 'sqltext'):
-                if 'generation_status' in str(constraint.sqltext):
+            if hasattr(constraint, "sqltext"):
+                if "generation_status" in str(constraint.sqltext):
                     check_constraint_exists = True
                     break
 
@@ -242,10 +221,7 @@ class TestLearningDocumentModel:
             actual = "CHECK 제약조건 없음"
 
         record_result(
-            test_name,
-            expected="CHECK 제약조건 존재",
-            actual=actual,
-            passed=passed
+            test_name, expected="CHECK 제약조건 존재", actual=actual, passed=passed
         )
 
         assert passed
@@ -262,7 +238,7 @@ class TestLearningDocumentModel:
             test_name,
             expected="Chapter1 title 반환",
             actual=chapter1.get("title") if chapter1 else "None",
-            passed=passed
+            passed=passed,
         )
 
         assert passed
@@ -277,11 +253,13 @@ def print_results_table():
     print("-" * 80)
 
     for result in test_results:
-        print(f"{result['test']:<45} {result['expected']:<20} {result['actual']:<15} {result['passed']:<6}")
+        print(
+            f"{result['test']:<45} {result['expected']:<20} {result['actual']:<15} {result['passed']:<6}"
+        )
 
     print("=" * 80)
 
-    passed_count = sum(1 for r in test_results if r['passed'] == 'PASS')
+    passed_count = sum(1 for r in test_results if r["passed"] == "PASS")
     total_count = len(test_results)
     print(f"총 {total_count}개 테스트 중 {passed_count}개 통과")
     print("=" * 80)

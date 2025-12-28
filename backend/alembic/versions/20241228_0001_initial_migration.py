@@ -6,17 +6,18 @@ Create Date: 2024-12-28
 
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "0001"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -26,9 +27,24 @@ def upgrade() -> None:
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("email", sa.String(length=255), nullable=False),
         sa.Column("password_hash", sa.String(length=255), nullable=False),
-        sa.Column("skill_level", sa.String(length=50), nullable=False, server_default="Complete Beginner"),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "skill_level",
+            sa.String(length=50),
+            nullable=False,
+            server_default="Complete Beginner",
+        ),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.Column("last_login_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.CheckConstraint(
             "email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}$'",
@@ -46,19 +62,43 @@ def upgrade() -> None:
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("title", sa.String(length=255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("last_activity_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("deletion_status", sa.String(length=20), nullable=False, server_default="active"),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "last_activity_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "deletion_status",
+            sa.String(length=20),
+            nullable=False,
+            server_default="active",
+        ),
         sa.Column("trashed_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("scheduled_deletion_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.CheckConstraint("char_length(title) >= 1", name="title_min_length"),
-        sa.CheckConstraint("deletion_status IN ('active', 'trashed')", name="valid_deletion_status"),
+        sa.CheckConstraint(
+            "deletion_status IN ('active', 'trashed')", name="valid_deletion_status"
+        ),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("idx_projects_user_id", "projects", ["user_id"], unique=False)
-    op.create_index("idx_projects_deletion_status", "projects", ["deletion_status"], unique=False)
+    op.create_index(
+        "idx_projects_deletion_status", "projects", ["deletion_status"], unique=False
+    )
 
     # Create tasks table
     op.create_table(
@@ -69,9 +109,24 @@ def upgrade() -> None:
         sa.Column("title", sa.String(length=255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("upload_method", sa.String(length=20), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("deletion_status", sa.String(length=20), nullable=False, server_default="active"),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "deletion_status",
+            sa.String(length=20),
+            nullable=False,
+            server_default="active",
+        ),
         sa.Column("trashed_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("scheduled_deletion_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.CheckConstraint("char_length(title) >= 5", name="tasks_title_min_length"),
@@ -83,14 +138,23 @@ def upgrade() -> None:
             "upload_method IS NULL OR upload_method IN ('file', 'folder', 'paste')",
             name="valid_upload_method",
         ),
-        sa.CheckConstraint("deletion_status IN ('active', 'trashed')", name="tasks_valid_deletion_status"),
+        sa.CheckConstraint(
+            "deletion_status IN ('active', 'trashed')",
+            name="tasks_valid_deletion_status",
+        ),
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("project_id", "task_number", name="unique_task_number_per_project"),
+        sa.UniqueConstraint(
+            "project_id", "task_number", name="unique_task_number_per_project"
+        ),
     )
     op.create_index("idx_tasks_project_id", "tasks", ["project_id"], unique=False)
-    op.create_index("idx_tasks_deletion_status", "tasks", ["deletion_status"], unique=False)
-    op.create_index("idx_tasks_number_order", "tasks", ["project_id", "task_number"], unique=False)
+    op.create_index(
+        "idx_tasks_deletion_status", "tasks", ["deletion_status"], unique=False
+    )
+    op.create_index(
+        "idx_tasks_number_order", "tasks", ["project_id", "task_number"], unique=False
+    )
 
     # Create refresh_tokens table
     op.create_table(
@@ -99,16 +163,29 @@ def upgrade() -> None:
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("token_hash", sa.String(length=255), nullable=False),
         sa.Column("expires_at", sa.TIMESTAMP(timezone=True), nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("revoked", sa.Boolean(), nullable=False, server_default=sa.text("false")),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "revoked", sa.Boolean(), nullable=False, server_default=sa.text("false")
+        ),
         sa.Column("revoked_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("token_hash"),
     )
-    op.create_index("idx_refresh_tokens_user_id", "refresh_tokens", ["user_id"], unique=False)
-    op.create_index("idx_refresh_tokens_hash", "refresh_tokens", ["token_hash"], unique=False)
-    op.create_index("idx_refresh_tokens_expires", "refresh_tokens", ["expires_at"], unique=False)
+    op.create_index(
+        "idx_refresh_tokens_user_id", "refresh_tokens", ["user_id"], unique=False
+    )
+    op.create_index(
+        "idx_refresh_tokens_hash", "refresh_tokens", ["token_hash"], unique=False
+    )
+    op.create_index(
+        "idx_refresh_tokens_expires", "refresh_tokens", ["expires_at"], unique=False
+    )
 
     # Create uploaded_code table
     op.create_table(
@@ -120,7 +197,12 @@ def upgrade() -> None:
         sa.Column("total_lines", sa.Integer(), nullable=True),
         sa.Column("total_files", sa.Integer(), nullable=True),
         sa.Column("upload_size_bytes", sa.Integer(), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.CheckConstraint(
             "complexity_level IS NULL OR complexity_level IN ('beginner', 'intermediate', 'advanced')",
             name="valid_complexity_level",
@@ -133,7 +215,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("task_id"),
     )
-    op.create_index("idx_uploaded_code_task_id", "uploaded_code", ["task_id"], unique=False)
+    op.create_index(
+        "idx_uploaded_code_task_id", "uploaded_code", ["task_id"], unique=False
+    )
 
     # Create code_files table
     op.create_table(
@@ -146,31 +230,65 @@ def upgrade() -> None:
         sa.Column("file_size_bytes", sa.Integer(), nullable=True),
         sa.Column("storage_path", sa.Text(), nullable=False),
         sa.Column("mime_type", sa.String(length=100), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.CheckConstraint(
             "file_extension IS NULL OR file_extension IN ("
             "'.py', '.js', '.ts', '.jsx', '.tsx', '.html', '.css', "
             "'.java', '.cpp', '.c', '.txt', '.md')",
             name="supported_extension",
         ),
-        sa.ForeignKeyConstraint(["uploaded_code_id"], ["uploaded_code.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["uploaded_code_id"], ["uploaded_code.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("idx_code_files_uploaded_code_id", "code_files", ["uploaded_code_id"], unique=False)
+    op.create_index(
+        "idx_code_files_uploaded_code_id",
+        "code_files",
+        ["uploaded_code_id"],
+        unique=False,
+    )
 
     # Create learning_documents table
     op.create_table(
         "learning_documents",
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("task_id", sa.UUID(), nullable=False),
-        sa.Column("content", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default="{}"),
-        sa.Column("generation_status", sa.String(length=20), nullable=False, server_default="pending"),
+        sa.Column(
+            "content",
+            postgresql.JSONB(astext_type=sa.Text()),
+            nullable=False,
+            server_default="{}",
+        ),
+        sa.Column(
+            "generation_status",
+            sa.String(length=20),
+            nullable=False,
+            server_default="pending",
+        ),
         sa.Column("generation_started_at", sa.TIMESTAMP(timezone=True), nullable=True),
-        sa.Column("generation_completed_at", sa.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column(
+            "generation_completed_at", sa.TIMESTAMP(timezone=True), nullable=True
+        ),
         sa.Column("generation_error", sa.Text(), nullable=True),
         sa.Column("celery_task_id", sa.String(length=255), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.CheckConstraint(
             "generation_status IN ('pending', 'in_progress', 'completed', 'failed')",
             name="valid_generation_status",
@@ -179,9 +297,24 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("task_id"),
     )
-    op.create_index("idx_learning_documents_task_id", "learning_documents", ["task_id"], unique=False)
-    op.create_index("idx_learning_documents_status", "learning_documents", ["generation_status"], unique=False)
-    op.create_index("idx_learning_documents_celery_task", "learning_documents", ["celery_task_id"], unique=False)
+    op.create_index(
+        "idx_learning_documents_task_id",
+        "learning_documents",
+        ["task_id"],
+        unique=False,
+    )
+    op.create_index(
+        "idx_learning_documents_status",
+        "learning_documents",
+        ["generation_status"],
+        unique=False,
+    )
+    op.create_index(
+        "idx_learning_documents_celery_task",
+        "learning_documents",
+        ["celery_task_id"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:

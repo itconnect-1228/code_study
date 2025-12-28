@@ -26,7 +26,6 @@ Usage:
 from dataclasses import dataclass
 from typing import Any
 
-
 # System instruction for all educational content generation (Korean)
 SYSTEM_INSTRUCTION_DOCUMENT = """당신은 프로그래밍 지식이 전혀 없는 완전 초보자를 위한 교육 콘텐츠를 만드는 전문 프로그래밍 강사입니다.
 
@@ -125,7 +124,11 @@ class PromptBuilder:
         """
         file_context = f" (파일명: '{self.filename}')" if self.filename else ""
         folder_info = self._format_folder_structure() if self.file_structure else ""
-        extra_context = f"\n\n추가 정보:\n{self.additional_context}" if self.additional_context else ""
+        extra_context = (
+            f"\n\n추가 정보:\n{self.additional_context}"
+            if self.additional_context
+            else ""
+        )
 
         return f"""다음 {self.language} 코드{file_context}를 분석하고 완전 초보자를 위한 7장 구성의 학습 문서를 만들어주세요.
 
@@ -371,10 +374,12 @@ class PracticePromptBuilder:
         Returns:
             str: The formatted prompt for generating 5 practice problems
         """
-        concepts_text = "\n".join([
-            f"- {c.get('name', '알 수 없음')}: {c.get('explanation', '')}"
-            for c in self.concepts
-        ])
+        concepts_text = "\n".join(
+            [
+                f"- {c.get('name', '알 수 없음')}: {c.get('explanation', '')}"
+                for c in self.concepts
+            ]
+        )
 
         return f"""이 코드와 학습 문서를 바탕으로 5개의 연습 문제를 생성하세요.
 
@@ -564,11 +569,8 @@ DOCUMENT_JSON_SCHEMA = {
     "properties": {
         "chapter1": {
             "type": "object",
-            "properties": {
-                "title": {"type": "string"},
-                "summary": {"type": "string"}
-            },
-            "required": ["title", "summary"]
+            "properties": {"title": {"type": "string"}, "summary": {"type": "string"}},
+            "required": ["title", "summary"],
         },
         "chapter2": {
             "type": "object",
@@ -583,14 +585,14 @@ DOCUMENT_JSON_SCHEMA = {
                             "explanation": {"type": "string"},
                             "analogy": {"type": "string"},
                             "example": {"type": "string"},
-                            "use_cases": {"type": "string"}
+                            "use_cases": {"type": "string"},
                         },
-                        "required": ["name", "explanation", "analogy"]
+                        "required": ["name", "explanation", "analogy"],
                     },
-                    "maxItems": 5
-                }
+                    "maxItems": 5,
+                },
             },
-            "required": ["title", "concepts"]
+            "required": ["title", "concepts"],
         },
         "chapter3": {
             "type": "object",
@@ -598,9 +600,9 @@ DOCUMENT_JSON_SCHEMA = {
                 "title": {"type": "string"},
                 "flowchart": {"type": "string"},
                 "file_breakdown": {"type": "object"},
-                "connections": {"type": "string"}
+                "connections": {"type": "string"},
             },
-            "required": ["title", "flowchart"]
+            "required": ["title", "flowchart"],
         },
         "chapter4": {
             "type": "object",
@@ -617,13 +619,13 @@ DOCUMENT_JSON_SCHEMA = {
                             "syntax_breakdown": {"type": "object"},
                             "analogy": {"type": "string"},
                             "alternatives": {"type": "string"},
-                            "notes": {"type": "string"}
+                            "notes": {"type": "string"},
                         },
-                        "required": ["lines", "code", "what_it_does"]
-                    }
-                }
+                        "required": ["lines", "code", "what_it_does"],
+                    },
+                },
             },
-            "required": ["title", "explanations"]
+            "required": ["title", "explanations"],
         },
         "chapter5": {
             "type": "object",
@@ -637,13 +639,13 @@ DOCUMENT_JSON_SCHEMA = {
                             "step_number": {"type": "integer"},
                             "what_happens": {"type": "string"},
                             "current_values": {"type": "object"},
-                            "why_it_matters": {"type": "string"}
+                            "why_it_matters": {"type": "string"},
                         },
-                        "required": ["step_number", "what_happens"]
-                    }
-                }
+                        "required": ["step_number", "what_happens"],
+                    },
+                },
             },
-            "required": ["title", "steps"]
+            "required": ["title", "steps"],
         },
         "chapter6": {
             "type": "object",
@@ -658,13 +660,13 @@ DOCUMENT_JSON_SCHEMA = {
                             "what_it_is": {"type": "string"},
                             "why_used": {"type": "string"},
                             "where_applied": {"type": "string"},
-                            "in_this_code": {"type": "string"}
+                            "in_this_code": {"type": "string"},
                         },
-                        "required": ["name", "what_it_is"]
-                    }
-                }
+                        "required": ["name", "what_it_is"],
+                    },
+                },
             },
-            "required": ["title", "concepts"]
+            "required": ["title", "concepts"],
         },
         "chapter7": {
             "type": "object",
@@ -679,21 +681,26 @@ DOCUMENT_JSON_SCHEMA = {
                             "wrong_code": {"type": "string"},
                             "right_code": {"type": "string"},
                             "why_it_matters": {"type": "string"},
-                            "how_to_fix": {"type": "string"}
+                            "how_to_fix": {"type": "string"},
                         },
-                        "required": ["mistake", "wrong_code", "right_code"]
+                        "required": ["mistake", "wrong_code", "right_code"],
                     },
                     "minItems": 3,
-                    "maxItems": 5
-                }
+                    "maxItems": 5,
+                },
             },
-            "required": ["title", "mistakes"]
-        }
+            "required": ["title", "mistakes"],
+        },
     },
     "required": [
-        "chapter1", "chapter2", "chapter3", "chapter4",
-        "chapter5", "chapter6", "chapter7"
-    ]
+        "chapter1",
+        "chapter2",
+        "chapter3",
+        "chapter4",
+        "chapter5",
+        "chapter6",
+        "chapter7",
+    ],
 }
 
 
@@ -702,7 +709,7 @@ def create_document_prompt(
     language: str,
     filename: str | None = None,
     additional_context: str | None = None,
-    file_structure: dict[str, Any] | None = None
+    file_structure: dict[str, Any] | None = None,
 ) -> tuple[str, str]:
     """
     Convenience function to create document generation prompt.
@@ -722,16 +729,13 @@ def create_document_prompt(
         language=language,
         filename=filename,
         additional_context=additional_context,
-        file_structure=file_structure
+        file_structure=file_structure,
     )
     return builder.get_system_instruction(), builder.build_document_prompt()
 
 
 def create_practice_prompt(
-    code: str,
-    language: str,
-    document_summary: str,
-    concepts: list[dict[str, str]]
+    code: str, language: str, document_summary: str, concepts: list[dict[str, str]]
 ) -> tuple[str, str]:
     """
     Convenience function to create practice problem generation prompt.
@@ -749,7 +753,7 @@ def create_practice_prompt(
         code=code,
         language=language,
         document_summary=document_summary,
-        concepts=concepts
+        concepts=concepts,
     )
     return builder.get_system_instruction(), builder.build_practice_prompt()
 
@@ -759,7 +763,7 @@ def create_qa_prompt(
     code_context: str | None = None,
     document_context: str | None = None,
     conversation_history: list[dict[str, str]] | None = None,
-    language: str = "Unknown"
+    language: str = "Unknown",
 ) -> tuple[str, str]:
     """
     Convenience function to create Q&A response prompt.
@@ -779,6 +783,6 @@ def create_qa_prompt(
         code_context=code_context,
         document_context=document_context,
         conversation_history=conversation_history,
-        language=language
+        language=language,
     )
     return builder.get_system_instruction(), builder.build_qa_prompt()

@@ -38,7 +38,6 @@ from src.services.code_analysis.complexity_analyzer import analyze_complexity
 from src.services.code_analysis.file_storage import FileStorageService
 from src.services.code_analysis.language_detector import detect_language
 
-
 # Language to file extension mapping
 LANGUAGE_EXTENSIONS = {
     "python": ".py",

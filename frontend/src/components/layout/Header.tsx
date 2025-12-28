@@ -1,6 +1,12 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LogOut, Trash2, LayoutDashboard, User, ChevronDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  LogOut,
+  Trash2,
+  LayoutDashboard,
+  User,
+  ChevronDown,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +14,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { useAuth } from '@/hooks/useAuth'
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Header - Main navigation header with user menu
@@ -20,16 +26,16 @@ import { useAuth } from '@/hooks/useAuth'
  * - User dropdown with email and logout
  */
 export default function Header() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-  }
+    await logout();
+    navigate("/login");
+  };
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <header className="border-b bg-background">
@@ -42,7 +48,9 @@ export default function Header() {
         {/* Navigation */}
         <nav className="flex items-center gap-1">
           <Button
-            variant={isActive('/dashboard') || isActive('/') ? 'secondary' : 'ghost'}
+            variant={
+              isActive("/dashboard") || isActive("/") ? "secondary" : "ghost"
+            }
             size="sm"
             asChild
           >
@@ -52,7 +60,7 @@ export default function Header() {
             </Link>
           </Button>
           <Button
-            variant={isActive('/trash') ? 'secondary' : 'ghost'}
+            variant={isActive("/trash") ? "secondary" : "ghost"}
             size="sm"
             asChild
           >
@@ -76,7 +84,9 @@ export default function Header() {
             <DropdownMenuLabel>
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-medium">내 계정</span>
-                <span className="text-xs text-muted-foreground">{user?.email}</span>
+                <span className="text-xs text-muted-foreground">
+                  {user?.email}
+                </span>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -88,5 +98,5 @@ export default function Header() {
         </DropdownMenu>
       </div>
     </header>
-  )
+  );
 }

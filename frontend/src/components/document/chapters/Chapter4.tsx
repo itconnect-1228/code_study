@@ -1,16 +1,16 @@
-import { cn } from '@/lib/utils'
-import { List } from 'lucide-react'
-import type { DocumentChapters } from '@/services/document-service'
+import { cn } from "@/lib/utils";
+import { List } from "lucide-react";
+import type { DocumentChapters } from "@/services/document-service";
 
 export interface Chapter4LineByLineProps {
   /** 챕터 데이터 */
-  data: DocumentChapters['lineByLine']
+  data: DocumentChapters["lineByLine"];
   /** 현재 선택된 라인 번호 */
-  selectedLine?: number
+  selectedLine?: number;
   /** 라인 선택 콜백 */
-  onLineSelect?: (lineNumber: number) => void
+  onLineSelect?: (lineNumber: number) => void;
   /** 추가 CSS 클래스 */
-  className?: string
+  className?: string;
 }
 
 /**
@@ -28,10 +28,10 @@ export function Chapter4LineByLine({
   onLineSelect,
   className,
 }: Chapter4LineByLineProps) {
-  const isInteractive = !!onLineSelect
+  const isInteractive = !!onLineSelect;
 
   return (
-    <div className={cn('chapter-line-by-line space-y-6', className)}>
+    <div className={cn("chapter-line-by-line space-y-6", className)}>
       {/* 챕터 헤더 */}
       <div className="flex items-center gap-3">
         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
@@ -49,31 +49,36 @@ export function Chapter4LineByLine({
       ) : (
         <div className="space-y-3">
           {data.explanations.map((item) => {
-            const isSelected = selectedLine === item.lineNumber
-            const Component = isInteractive ? 'button' : 'div'
+            const isSelected = selectedLine === item.lineNumber;
+            const Component = isInteractive ? "button" : "div";
 
             return (
               <Component
                 key={item.lineNumber}
                 data-testid={`line-item-${item.lineNumber}`}
                 data-selected={isSelected}
-                onClick={isInteractive ? () => onLineSelect(item.lineNumber) : undefined}
+                onClick={
+                  isInteractive
+                    ? () => onLineSelect(item.lineNumber)
+                    : undefined
+                }
                 className={cn(
-                  'w-full text-left p-4 rounded-lg border transition-all',
-                  isInteractive && 'cursor-pointer hover:border-primary/50 hover:bg-accent/50',
+                  "w-full text-left p-4 rounded-lg border transition-all",
+                  isInteractive &&
+                    "cursor-pointer hover:border-primary/50 hover:bg-accent/50",
                   isSelected
-                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                    : 'border-border bg-card'
+                    ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                    : "border-border bg-card",
                 )}
               >
                 <div className="flex items-start gap-4">
                   {/* 라인 번호 */}
                   <span
                     className={cn(
-                      'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-mono font-medium',
+                      "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-mono font-medium",
                       isSelected
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground",
                     )}
                   >
                     {item.lineNumber}
@@ -93,12 +98,12 @@ export function Chapter4LineByLine({
                   </div>
                 </div>
               </Component>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default Chapter4LineByLine
+export default Chapter4LineByLine;

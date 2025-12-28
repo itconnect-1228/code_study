@@ -245,9 +245,7 @@ class TestFileStorageServiceDeleteFiles:
 
         assert not storage_dir.exists()
 
-    def test_delete_files_nonexistent_directory_no_error(
-        self, tmp_path: Path
-    ) -> None:
+    def test_delete_files_nonexistent_directory_no_error(self, tmp_path: Path) -> None:
         """Should not raise error for non-existent directory."""
         storage = FileStorageService(base_path=tmp_path)
         user_id = uuid4()

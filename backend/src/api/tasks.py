@@ -32,7 +32,6 @@ from src.services.project_service import ProjectService
 from src.services.task_service import TaskService
 from src.utils.file_validator import validate_upload
 
-
 router = APIRouter(tags=["tasks"])
 
 

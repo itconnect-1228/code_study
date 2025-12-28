@@ -5,10 +5,6 @@ Tests for file extension, size, binary detection, and excluded paths validation.
 Follows TDD cycle: RED -> GREEN -> REFACTOR
 """
 
-import io
-import tempfile
-from pathlib import Path
-
 
 class TestFileExtensionValidation:
     """Tests for file extension validation functionality."""
@@ -200,7 +196,7 @@ class TestBinaryDetection:
         """UTF-8 text content should be detected as non-binary."""
         from src.utils.file_validator import is_binary_content
 
-        utf8_content = "안녕하세요. Hello, World!".encode("utf-8")
+        utf8_content = "안녕하세요. Hello, World!".encode()
         assert is_binary_content(utf8_content) is False
 
     def test_is_binary_detects_null_bytes(self):
@@ -404,7 +400,10 @@ class TestValidateFile:
 
         assert result.is_valid is False
         # Error message should indicate text files only (user-friendly wording)
-        assert "text" in result.error_message.lower() or "source code" in result.error_message.lower()
+        assert (
+            "text" in result.error_message.lower()
+            or "source code" in result.error_message.lower()
+        )
 
     def test_validate_file_rejects_invalid_extension(self):
         """Invalid file extension should be rejected."""
@@ -414,7 +413,10 @@ class TestValidateFile:
         result = validate_file("program.exe", content)
 
         assert result.is_valid is False
-        assert "extension" in result.error_message.lower() or "format" in result.error_message.lower()
+        assert (
+            "extension" in result.error_message.lower()
+            or "format" in result.error_message.lower()
+        )
 
     def test_validate_file_rejects_large_file(self):
         """File over 10MB should be rejected."""

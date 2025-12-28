@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,16 +6,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateProjectModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (title: string, description?: string) => Promise<void>
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (title: string, description?: string) => Promise<void>;
 }
 
 /**
@@ -23,43 +23,47 @@ interface CreateProjectModalProps {
  *
  * Provides form inputs for project title (required) and description (optional).
  */
-export function CreateProjectModal({ open, onOpenChange, onSubmit }: CreateProjectModalProps) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export function CreateProjectModal({
+  open,
+  onOpenChange,
+  onSubmit,
+}: CreateProjectModalProps) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
 
     if (!title.trim()) {
-      setError('프로젝트 제목을 입력해주세요.')
-      return
+      setError("프로젝트 제목을 입력해주세요.");
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      await onSubmit(title.trim(), description.trim() || undefined)
+      await onSubmit(title.trim(), description.trim() || undefined);
       // Reset form on success
-      setTitle('')
-      setDescription('')
-      onOpenChange(false)
-    } catch (err) {
-      setError('프로젝트 생성에 실패했습니다. 다시 시도해주세요.')
+      setTitle("");
+      setDescription("");
+      onOpenChange(false);
+    } catch {
+      setError("프로젝트 생성에 실패했습니다. 다시 시도해주세요.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setTitle('')
-      setDescription('')
-      setError(null)
-      onOpenChange(false)
+      setTitle("");
+      setDescription("");
+      setError(null);
+      onOpenChange(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -97,23 +101,26 @@ export function CreateProjectModal({ open, onOpenChange, onSubmit }: CreateProje
               />
             </div>
 
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               취소
             </Button>
             <Button type="submit" disabled={isSubmitting || !title.trim()}>
-              {isSubmitting ? '생성 중...' : '프로젝트 만들기'}
+              {isSubmitting ? "생성 중..." : "프로젝트 만들기"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default CreateProjectModal
+export default CreateProjectModal;

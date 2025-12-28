@@ -21,11 +21,24 @@ from src.services.task_service import TaskService
 SAMPLE_DOCUMENT_CONTENT = {
     "chapter1": {"title": "What This Code Does", "summary": "Test summary"},
     "chapter2": {"title": "Prerequisites", "concepts": ["concept1", "concept2"]},
-    "chapter3": {"title": "Code Structure", "flowchart": "graph TD", "file_breakdown": {}},
-    "chapter4": {"title": "Line-by-Line", "explanations": [{"line": 1, "explanation": "test"}]},
+    "chapter3": {
+        "title": "Code Structure",
+        "flowchart": "graph TD",
+        "file_breakdown": {},
+    },
+    "chapter4": {
+        "title": "Line-by-Line",
+        "explanations": [{"line": 1, "explanation": "test"}],
+    },
     "chapter5": {"title": "Execution Flow", "steps": ["step1", "step2"]},
-    "chapter6": {"title": "Core Concepts", "concepts": [{"name": "test", "description": "test"}]},
-    "chapter7": {"title": "Common Mistakes", "mistakes": [{"mistake": "test", "fix": "test"}]},
+    "chapter6": {
+        "title": "Core Concepts",
+        "concepts": [{"name": "test", "description": "test"}],
+    },
+    "chapter7": {
+        "title": "Common Mistakes",
+        "mistakes": [{"mistake": "test", "fix": "test"}],
+    },
 }
 
 
@@ -91,7 +104,9 @@ class TestGetDocumentEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "User1 Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "User1 Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Login as user2
@@ -123,7 +138,9 @@ class TestGetDocumentEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "My Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "My Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Login
@@ -156,7 +173,9 @@ class TestGetDocumentEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "My Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "My Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Create completed document
@@ -203,14 +222,20 @@ class TestGetDocumentEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "My Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "My Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Create pending document with placeholder content
         placeholder_content = {
             "chapter1": {"title": "Generating...", "summary": ""},
             "chapter2": {"title": "Generating...", "concepts": []},
-            "chapter3": {"title": "Generating...", "flowchart": "", "file_breakdown": {}},
+            "chapter3": {
+                "title": "Generating...",
+                "flowchart": "",
+                "file_breakdown": {},
+            },
             "chapter4": {"title": "Generating...", "explanations": []},
             "chapter5": {"title": "Generating...", "steps": []},
             "chapter6": {"title": "Generating...", "concepts": []},
@@ -298,7 +323,9 @@ class TestGetDocumentStatusEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "User1 Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "User1 Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Login as user2
@@ -329,7 +356,9 @@ class TestGetDocumentStatusEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "My Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "My Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Login
@@ -362,14 +391,20 @@ class TestGetDocumentStatusEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "My Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "My Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Create pending document
         placeholder_content = {
             "chapter1": {"title": "Generating...", "summary": ""},
             "chapter2": {"title": "Generating...", "concepts": []},
-            "chapter3": {"title": "Generating...", "flowchart": "", "file_breakdown": {}},
+            "chapter3": {
+                "title": "Generating...",
+                "flowchart": "",
+                "file_breakdown": {},
+            },
             "chapter4": {"title": "Generating...", "explanations": []},
             "chapter5": {"title": "Generating...", "steps": []},
             "chapter6": {"title": "Generating...", "concepts": []},
@@ -417,14 +452,20 @@ class TestGetDocumentStatusEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "My Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "My Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Create in_progress document
         placeholder_content = {
             "chapter1": {"title": "Generating...", "summary": ""},
             "chapter2": {"title": "Generating...", "concepts": []},
-            "chapter3": {"title": "Generating...", "flowchart": "", "file_breakdown": {}},
+            "chapter3": {
+                "title": "Generating...",
+                "flowchart": "",
+                "file_breakdown": {},
+            },
             "chapter4": {"title": "Generating...", "explanations": []},
             "chapter5": {"title": "Generating...", "steps": []},
             "chapter6": {"title": "Generating...", "concepts": []},
@@ -473,7 +514,9 @@ class TestGetDocumentStatusEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "My Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "My Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Create completed document
@@ -521,7 +564,9 @@ class TestGetDocumentStatusEndpoint:
         await db_session.commit()
 
         task_service = TaskService(db_session)
-        task = await task_service.create(project.id, "My Task Title", upload_method="file")
+        task = await task_service.create(
+            project.id, "My Task Title", upload_method="file"
+        )
         await db_session.commit()
 
         # Create failed document

@@ -1,20 +1,20 @@
-import { useState, useCallback } from 'react'
-import { cn } from '@/lib/utils'
-import { CodePanel } from './CodePanel'
-import { ExplanationPanel, type ChapterKey } from './ExplanationPanel'
-import { FileCode } from 'lucide-react'
-import type { LearningDocument } from '@/services/document-service'
-import type { CodeFile } from '@/services/task-service'
+import { useState, useCallback } from "react";
+import { cn } from "@/lib/utils";
+import { CodePanel } from "./CodePanel";
+import { ExplanationPanel, type ChapterKey } from "./ExplanationPanel";
+import { FileCode } from "lucide-react";
+import type { LearningDocument } from "@/services/document-service";
+import type { CodeFile } from "@/services/task-service";
 
 export interface DocumentViewerProps {
   /** 학습 문서 데이터 */
-  document: LearningDocument
+  document: LearningDocument;
   /** 코드 파일 (선택사항) */
-  codeFile?: CodeFile
+  codeFile?: CodeFile;
   /** 라인 선택 콜백 */
-  onLineSelect?: (lineNumber: number) => void
+  onLineSelect?: (lineNumber: number) => void;
   /** 추가 CSS 클래스 */
-  className?: string
+  className?: string;
 }
 
 /**
@@ -31,32 +31,32 @@ export function DocumentViewer({
   onLineSelect,
   className,
 }: DocumentViewerProps) {
-  const [currentChapter, setCurrentChapter] = useState<ChapterKey>('summary')
-  const [selectedLine, setSelectedLine] = useState<number | undefined>()
+  const [currentChapter, setCurrentChapter] = useState<ChapterKey>("summary");
+  const [selectedLine, setSelectedLine] = useState<number | undefined>();
 
   // 챕터 변경 핸들러
   const handleChapterChange = useCallback((chapter: ChapterKey) => {
-    setCurrentChapter(chapter)
+    setCurrentChapter(chapter);
     // 챕터가 변경되면 라인 선택 초기화
-    if (chapter !== 'lineByLine') {
-      setSelectedLine(undefined)
+    if (chapter !== "lineByLine") {
+      setSelectedLine(undefined);
     }
-  }, [])
+  }, []);
 
   // 라인 선택 핸들러
   const handleLineSelect = useCallback(
     (lineNumber: number) => {
-      setSelectedLine(lineNumber)
-      onLineSelect?.(lineNumber)
+      setSelectedLine(lineNumber);
+      onLineSelect?.(lineNumber);
     },
-    [onLineSelect]
-  )
+    [onLineSelect],
+  );
 
   // 하이라이트할 라인 계산
-  const highlightedLines = selectedLine ? [selectedLine] : []
+  const highlightedLines = selectedLine ? [selectedLine] : [];
 
   return (
-    <div className={cn('document-viewer h-full flex flex-col', className)}>
+    <div className={cn("document-viewer h-full flex flex-col", className)}>
       <div className="document-viewer-layout flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
         {/* 왼쪽: 코드 패널 */}
         <div
@@ -97,7 +97,7 @@ export function DocumentViewer({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default DocumentViewer
+export default DocumentViewer;

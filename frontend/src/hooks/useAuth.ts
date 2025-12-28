@@ -1,6 +1,6 @@
-import { useCallback } from 'react'
-import { authService, type User as ServiceUser } from '@/services/auth-service'
-import { useAuthStore, type User as StoreUser } from '@/stores/auth-store'
+import { useCallback } from "react";
+import { authService, type User as ServiceUser } from "@/services/auth-service";
+import { useAuthStore, type User as StoreUser } from "@/stores/auth-store";
 
 /**
  * Transform service user to store user format
@@ -9,7 +9,7 @@ const transformToStoreUser = (serviceUser: ServiceUser): StoreUser => ({
   id: serviceUser.id,
   email: serviceUser.email,
   createdAt: new Date().toISOString(),
-})
+});
 
 /**
  * Custom hook for authentication operations
@@ -34,60 +34,60 @@ const transformToStoreUser = (serviceUser: ServiceUser): StoreUser => ({
  * ```
  */
 export function useAuth() {
-  const user = useAuthStore(state => state.user)
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated)
-  const isLoading = useAuthStore(state => state.isLoading)
-  const setUser = useAuthStore(state => state.setUser)
-  const setLoading = useAuthStore(state => state.setLoading)
-  const clearAuth = useAuthStore(state => state.clearAuth)
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const setUser = useAuthStore((state) => state.setUser);
+  const setLoading = useAuthStore((state) => state.setLoading);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
   /**
    * Login with email and password
    */
   const login = useCallback(
     async (email: string, password: string) => {
-      setLoading(true)
+      setLoading(true);
       try {
-        const serviceUser = await authService.login(email, password)
-        setUser(transformToStoreUser(serviceUser))
+        const serviceUser = await authService.login(email, password);
+        setUser(transformToStoreUser(serviceUser));
       } catch (error) {
-        clearAuth()
-        throw error
+        clearAuth();
+        throw error;
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     },
-    [setLoading, setUser, clearAuth]
-  )
+    [setLoading, setUser, clearAuth],
+  );
 
   /**
    * Logout the current user
    */
   const logout = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      await authService.logout()
+      await authService.logout();
     } finally {
-      clearAuth()
-      setLoading(false)
+      clearAuth();
+      setLoading(false);
     }
-  }, [setLoading, clearAuth])
+  }, [setLoading, clearAuth]);
 
   /**
    * Refresh the current session
    */
   const refresh = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const serviceUser = await authService.refresh()
-      setUser(transformToStoreUser(serviceUser))
+      const serviceUser = await authService.refresh();
+      setUser(transformToStoreUser(serviceUser));
     } catch (error) {
-      clearAuth()
-      throw error
+      clearAuth();
+      throw error;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [setLoading, setUser, clearAuth])
+  }, [setLoading, setUser, clearAuth]);
 
   return {
     user,
@@ -96,7 +96,7 @@ export function useAuth() {
     login,
     logout,
     refresh,
-  }
+  };
 }
 
-export default useAuth
+export default useAuth;

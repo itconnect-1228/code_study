@@ -1,22 +1,29 @@
-import { Link } from 'react-router-dom'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import type { Project } from '@/services/project-service'
+import { Link } from "react-router-dom";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import type { Project } from "@/services/project-service";
 
 interface ProjectCardProps {
-  project: Project
+  project: Project;
 }
 
 /**
  * Format date to Korean locale string
  */
 function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+  const date = new Date(dateString);
+  return date.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 /**
@@ -26,7 +33,7 @@ function formatDate(dateString: string): string {
  * Links to the project detail page.
  */
 export function ProjectCard({ project }: ProjectCardProps) {
-  const isActive = project.deletionStatus === 'active'
+  const isActive = project.deletionStatus === "active";
 
   return (
     <Link to={`/projects/${project.id}`} className="block">
@@ -59,7 +66,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </CardFooter>
       </Card>
     </Link>
-  )
+  );
 }
 
-export default ProjectCard
+export default ProjectCard;

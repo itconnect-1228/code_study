@@ -1,13 +1,19 @@
-import { useRef, useState, useCallback, type DragEvent, type ChangeEvent } from 'react'
-import { FolderOpen } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import {
+  useRef,
+  useState,
+  useCallback,
+  type DragEvent,
+  type ChangeEvent,
+} from "react";
+import { FolderOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export interface FolderUploadProps {
-  onFolderSelect: (files: File[]) => void
-  onError?: (message: string) => void
-  maxFiles?: number
-  disabled?: boolean
+  onFolderSelect: (files: File[]) => void;
+  onError?: (message: string) => void;
+  maxFiles?: number;
+  disabled?: boolean;
 }
 
 /**
@@ -25,89 +31,93 @@ export function FolderUpload({
   maxFiles,
   disabled = false,
 }: FolderUploadProps) {
-  const [isDragOver, setIsDragOver] = useState(false)
-  const folderInputRef = useRef<HTMLInputElement>(null)
+  const [isDragOver, setIsDragOver] = useState(false);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
   const validateFiles = useCallback(
     (files: File[]): File[] | null => {
       if (maxFiles && files.length > maxFiles) {
-        onError?.(`파일 수가 너무 많습니다. 최대 ${maxFiles}개까지 허용됩니다.`)
-        return null
+        onError?.(
+          `파일 수가 너무 많습니다. 최대 ${maxFiles}개까지 허용됩니다.`,
+        );
+        return null;
       }
-      return files
+      return files;
     },
-    [maxFiles, onError]
-  )
+    [maxFiles, onError],
+  );
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
-      if (!files || files.length === 0) return
+      if (!files || files.length === 0) return;
 
-      const fileArray = Array.from(files)
-      const validatedFiles = validateFiles(fileArray)
+      const fileArray = Array.from(files);
+      const validatedFiles = validateFiles(fileArray);
 
       if (validatedFiles) {
-        onFolderSelect(validatedFiles)
+        onFolderSelect(validatedFiles);
       }
     },
-    [onFolderSelect, validateFiles]
-  )
+    [onFolderSelect, validateFiles],
+  );
 
   const handleDragEnter = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
+      e.preventDefault();
+      e.stopPropagation();
       if (!disabled) {
-        setIsDragOver(true)
+        setIsDragOver(true);
       }
     },
-    [disabled]
-  )
+    [disabled],
+  );
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragOver(false)
-  }, [])
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }, [])
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
 
   const handleDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setIsDragOver(false)
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
 
-      if (disabled) return
+      if (disabled) return;
 
-      handleFiles(e.dataTransfer.files)
+      handleFiles(e.dataTransfer.files);
     },
-    [disabled, handleFiles]
-  )
+    [disabled, handleFiles],
+  );
 
   const handleFolderInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      handleFiles(e.target.files)
+      handleFiles(e.target.files);
       // Reset input value to allow selecting the same folder again
-      e.target.value = ''
+      e.target.value = "";
     },
-    [handleFiles]
-  )
+    [handleFiles],
+  );
 
   const handleButtonClick = useCallback(() => {
-    folderInputRef.current?.click()
-  }, [])
+    folderInputRef.current?.click();
+  }, []);
 
   return (
     <div
       data-testid="folder-drop-zone"
       className={cn(
-        'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
-        isDragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25',
-        disabled && 'opacity-50 cursor-not-allowed'
+        "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+        isDragOver
+          ? "border-primary bg-primary/5"
+          : "border-muted-foreground/25",
+        disabled && "opacity-50 cursor-not-allowed",
       )}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -138,12 +148,10 @@ export function FolderUpload({
         폴더 구조가 보존됩니다
       </p>
       {maxFiles && (
-        <p className="text-xs text-muted-foreground">
-          최대 {maxFiles}개 파일
-        </p>
+        <p className="text-xs text-muted-foreground">최대 {maxFiles}개 파일</p>
       )}
     </div>
-  )
+  );
 }
 
-export default FolderUpload
+export default FolderUpload;

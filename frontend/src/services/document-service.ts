@@ -1,50 +1,50 @@
-import { apiClient } from './api-client'
+import { apiClient } from "./api-client";
 
 /**
  * 학습 문서 상태
  */
-export type DocumentStatus = 'pending' | 'generating' | 'completed' | 'error'
+export type DocumentStatus = "pending" | "generating" | "completed" | "error";
 
 /**
  * 개념 카드 (사전 지식 챕터용)
  */
 export interface ConceptCard {
-  name: string
-  explanation: string
-  analogy: string
+  name: string;
+  explanation: string;
+  analogy: string;
 }
 
 /**
  * 라인별 설명 항목
  */
 export interface LineExplanation {
-  lineNumber: number
-  code: string
-  explanation: string
+  lineNumber: number;
+  code: string;
+  explanation: string;
 }
 
 /**
  * 문법 레퍼런스 항목
  */
 export interface SyntaxItem {
-  syntax: string
-  description: string
+  syntax: string;
+  description: string;
 }
 
 /**
  * 코드 패턴 항목
  */
 export interface PatternItem {
-  name: string
-  description: string
+  name: string;
+  description: string;
 }
 
 /**
  * 연습 문제 항목
  */
 export interface ExerciseItem {
-  question: string
-  hint: string
+  question: string;
+  hint: string;
 }
 
 /**
@@ -53,65 +53,65 @@ export interface ExerciseItem {
 export interface DocumentChapters {
   /** Chapter 1: 코드 요약 */
   summary: {
-    title: string
-    content: string
-  }
+    title: string;
+    content: string;
+  };
   /** Chapter 2: 사전 지식 */
   prerequisites: {
-    title: string
-    concepts: ConceptCard[]
-  }
+    title: string;
+    concepts: ConceptCard[];
+  };
   /** Chapter 3: 핵심 로직 */
   coreLogic: {
-    title: string
-    content: string
-  }
+    title: string;
+    content: string;
+  };
   /** Chapter 4: 라인별 설명 */
   lineByLine: {
-    title: string
-    explanations: LineExplanation[]
-  }
+    title: string;
+    explanations: LineExplanation[];
+  };
   /** Chapter 5: 문법 레퍼런스 */
   syntaxReference: {
-    title: string
-    items: SyntaxItem[]
-  }
+    title: string;
+    items: SyntaxItem[];
+  };
   /** Chapter 6: 자주 쓰는 패턴 */
   commonPatterns: {
-    title: string
-    patterns: PatternItem[]
-  }
+    title: string;
+    patterns: PatternItem[];
+  };
   /** Chapter 7: 연습 문제 */
   exercises: {
-    title: string
-    items: ExerciseItem[]
-  }
+    title: string;
+    items: ExerciseItem[];
+  };
 }
 
 /**
  * 학습 문서 (Frontend 형식 - camelCase)
  */
 export interface LearningDocument {
-  id: string
-  taskId: string
-  status: DocumentStatus
-  chapters: DocumentChapters
-  errorMessage?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  taskId: string;
+  status: DocumentStatus;
+  chapters: DocumentChapters;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
  * Backend 응답 형식 (snake_case)
  */
 interface DocumentResponseDTO {
-  id: string
-  task_id: string
-  status: DocumentStatus
-  chapters: DocumentChapters
-  error_message?: string
-  created_at: string
-  updated_at: string
+  id: string;
+  task_id: string;
+  status: DocumentStatus;
+  chapters: DocumentChapters;
+  error_message?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 /**
@@ -125,7 +125,7 @@ const transformDocument = (dto: DocumentResponseDTO): LearningDocument => ({
   errorMessage: dto.error_message,
   createdAt: dto.created_at,
   updatedAt: dto.updated_at,
-})
+});
 
 /**
  * Document Service - 학습 문서 API 호출 관리
@@ -138,11 +138,13 @@ export const documentService = {
    */
   async getDocument(taskId: string): Promise<LearningDocument | null> {
     try {
-      const response = await apiClient.get<DocumentResponseDTO>(`/tasks/${taskId}/document`)
-      return transformDocument(response.data)
-    } catch (error) {
+      const response = await apiClient.get<DocumentResponseDTO>(
+        `/tasks/${taskId}/document`,
+      );
+      return transformDocument(response.data);
+    } catch {
       // 문서가 없는 경우 null 반환
-      return null
+      return null;
     }
   },
 
@@ -152,8 +154,10 @@ export const documentService = {
    * @returns 생성된 문서 정보
    */
   async generateDocument(taskId: string): Promise<LearningDocument> {
-    const response = await apiClient.post<DocumentResponseDTO>(`/tasks/${taskId}/document/generate`)
-    return transformDocument(response.data)
+    const response = await apiClient.post<DocumentResponseDTO>(
+      `/tasks/${taskId}/document/generate`,
+    );
+    return transformDocument(response.data);
   },
 
   /**
@@ -161,12 +165,15 @@ export const documentService = {
    * @param taskId - 태스크 ID
    * @returns 현재 문서 상태
    */
-  async pollDocumentStatus(taskId: string): Promise<{ status: DocumentStatus; progress?: number }> {
-    const response = await apiClient.get<{ status: DocumentStatus; progress?: number }>(
-      `/tasks/${taskId}/document/status`
-    )
-    return response.data
+  async pollDocumentStatus(
+    taskId: string,
+  ): Promise<{ status: DocumentStatus; progress?: number }> {
+    const response = await apiClient.get<{
+      status: DocumentStatus;
+      progress?: number;
+    }>(`/tasks/${taskId}/document/status`);
+    return response.data;
   },
-}
+};
 
-export default documentService
+export default documentService;

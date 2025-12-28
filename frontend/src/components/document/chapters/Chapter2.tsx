@@ -1,13 +1,13 @@
-import { cn } from '@/lib/utils'
-import { Lightbulb, Sparkles } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { DocumentChapters } from '@/services/document-service'
+import { cn } from "@/lib/utils";
+import { Lightbulb, Sparkles } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { DocumentChapters } from "@/services/document-service";
 
 export interface Chapter2PrerequisitesProps {
   /** 챕터 데이터 */
-  data: DocumentChapters['prerequisites']
+  data: DocumentChapters["prerequisites"];
   /** 추가 CSS 클래스 */
-  className?: string
+  className?: string;
 }
 
 /**
@@ -18,9 +18,12 @@ export interface Chapter2PrerequisitesProps {
  * - 각 개념에 대한 설명과 비유 포함
  * - 시각적으로 구분된 카드 레이아웃
  */
-export function Chapter2Prerequisites({ data, className }: Chapter2PrerequisitesProps) {
+export function Chapter2Prerequisites({
+  data,
+  className,
+}: Chapter2PrerequisitesProps) {
   return (
-    <div className={cn('chapter-prerequisites space-y-6', className)}>
+    <div className={cn("chapter-prerequisites space-y-6", className)}>
       {/* 챕터 헤더 */}
       <div className="flex items-center gap-3">
         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
@@ -71,7 +74,7 @@ export function Chapter2Prerequisites({ data, className }: Chapter2Prerequisites
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default Chapter2Prerequisites
+export default Chapter2Prerequisites;

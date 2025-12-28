@@ -1,25 +1,25 @@
-import { useState, useCallback } from 'react'
-import { Code } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import { useState, useCallback } from "react";
+import { Code } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 
 export interface PasteCodeData {
-  code: string
-  language: string
+  code: string;
+  language: string;
 }
 
 export interface PasteCodeProps {
-  onPaste: (data: PasteCodeData) => void
-  languages: string[]
-  defaultLanguage?: string
-  disabled?: boolean
+  onPaste: (data: PasteCodeData) => void;
+  languages: string[];
+  defaultLanguage?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -36,22 +36,24 @@ export function PasteCode({
   defaultLanguage,
   disabled = false,
 }: PasteCodeProps) {
-  const [code, setCode] = useState('')
-  const [language, setLanguage] = useState(defaultLanguage || languages[0] || '')
+  const [code, setCode] = useState("");
+  const [language, setLanguage] = useState(
+    defaultLanguage || languages[0] || "",
+  );
 
   const handleSubmit = useCallback(() => {
-    if (!code.trim()) return
+    if (!code.trim()) return;
 
     onPaste({
       code: code.trim(),
       language,
-    })
+    });
 
     // Clear the textarea after successful submit
-    setCode('')
-  }, [code, language, onPaste])
+    setCode("");
+  }, [code, language, onPaste]);
 
-  const isSubmitDisabled = disabled || !code.trim()
+  const isSubmitDisabled = disabled || !code.trim();
 
   return (
     <div className="space-y-4">
@@ -89,16 +91,13 @@ export function PasteCode({
         />
 
         <div className="flex justify-end">
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitDisabled}
-          >
+          <Button onClick={handleSubmit} disabled={isSubmitDisabled}>
             코드 추가
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default PasteCode
+export default PasteCode;

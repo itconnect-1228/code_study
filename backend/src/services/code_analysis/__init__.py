@@ -6,24 +6,23 @@ This package provides services for analyzing uploaded code including:
 - File storage and management
 """
 
-from .language_detector import (
-    LanguageInfo,
-    detect_language_by_filename,
-    detect_language_by_content,
-    detect_language,
-    get_supported_languages,
-    get_language_by_name,
-)
-
 from .complexity_analyzer import (
     CodeComplexity,
     ComplexityLevel,
     analyze_complexity,
-    count_lines,
     calculate_nesting_depth,
-    count_functions,
     count_classes,
+    count_functions,
+    count_lines,
     determine_complexity_level,
+)
+from .language_detector import (
+    LanguageInfo,
+    detect_language,
+    detect_language_by_content,
+    detect_language_by_filename,
+    get_language_by_name,
+    get_supported_languages,
 )
 
 __all__ = [

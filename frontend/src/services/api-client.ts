@@ -1,17 +1,22 @@
-import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
+import axios, {
+  type AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from "axios";
 
 /**
  * API Base URL - defaults to localhost:8000/api/v1 for development
  * Override with VITE_API_BASE_URL environment variable for production
  */
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
 
 /**
  * Default timeout for API requests (30 seconds)
  * Note: Long-running operations like AI document generation may need
  * individual timeout overrides
  */
-const DEFAULT_TIMEOUT = 30000
+const DEFAULT_TIMEOUT = 30000;
 
 /**
  * Axios instance configured for the backend API
@@ -27,10 +32,10 @@ export const apiClient = axios.create({
   timeout: DEFAULT_TIMEOUT,
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   },
-})
+});
 
 /**
  * Request interceptor - runs before each request is sent
@@ -46,12 +51,12 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Future: Add CSRF token, logging, etc.
-    return config
+    return config;
   },
   (error: AxiosError) => {
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 
 /**
  * Response interceptor - runs after each response is received
@@ -68,12 +73,12 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    return response
+    return response;
   },
   (error: AxiosError) => {
     // Future: Handle 401 redirect, token refresh, etc.
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 
-export default apiClient
+export default apiClient;

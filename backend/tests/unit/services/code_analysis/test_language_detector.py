@@ -11,16 +11,16 @@ Tests the language detection functionality using Pygments including:
 import pytest
 
 from src.services.code_analysis.language_detector import (
-    LanguageInfo,
     UNKNOWN_LANGUAGE,
-    detect_language_by_filename,
-    detect_language_by_content,
+    LanguageInfo,
     detect_language,
-    get_supported_languages,
-    get_language_by_name,
-    is_language_supported,
-    get_primary_alias,
+    detect_language_by_content,
+    detect_language_by_filename,
     get_extension_for_language,
+    get_language_by_name,
+    get_primary_alias,
+    get_supported_languages,
+    is_language_supported,
 )
 
 
@@ -80,7 +80,10 @@ class TestDetectLanguageByFilename:
             ("main.cpp", ["C++"]),
             ("program.c", ["C"]),
             ("app.ts", ["TypeScript"]),
-            ("component.tsx", ["TSX", "TypeScript"]),  # Pygments reports TSX specifically
+            (
+                "component.tsx",
+                ["TSX", "TypeScript"],
+            ),  # Pygments reports TSX specifically
             ("data.json", ["JSON"]),
             ("config.yaml", ["YAML"]),
             ("config.yml", ["YAML"]),

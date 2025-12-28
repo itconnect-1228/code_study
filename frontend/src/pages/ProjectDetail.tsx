@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Pencil, Trash2, Loader2, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import { useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Pencil, Trash2, Loader2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -25,27 +25,36 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { projectService } from '@/services/project-service'
-import { taskService, type TaskCreateData } from '@/services/task-service'
-import { TaskCard } from '@/components/task/TaskCard'
-import { CreateTaskModal } from '@/components/task/CreateTaskModal'
-import { toast } from 'sonner'
+} from "@/components/ui/dialog";
+import { projectService } from "@/services/project-service";
+import { taskService, type TaskCreateData } from "@/services/task-service";
+import { TaskCard } from "@/components/task/TaskCard";
+import { CreateTaskModal } from "@/components/task/CreateTaskModal";
+import { toast } from "sonner";
 
-const SUPPORTED_LANGUAGES = ['javascript', 'typescript', 'python', 'java', 'go', 'rust', 'c', 'cpp']
+const SUPPORTED_LANGUAGES = [
+  "javascript",
+  "typescript",
+  "python",
+  "java",
+  "go",
+  "rust",
+  "c",
+  "cpp",
+];
 
 /**
  * Format date to Korean locale string
  */
 function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const date = new Date(dateString);
+  return date.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 /**
@@ -58,110 +67,116 @@ function formatDate(dateString: string): string {
  * - Edit and delete actions
  */
 export default function ProjectDetail() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false)
-  const [editTitle, setEditTitle] = useState('')
-  const [editDescription, setEditDescription] = useState('')
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   // Fetch project
-  const { data: project, isLoading, error } = useQuery({
-    queryKey: ['project', id],
+  const {
+    data: project,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["project", id],
     queryFn: () => projectService.getProject(id!),
     enabled: !!id,
-  })
+  });
 
   // Fetch tasks
   const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['tasks', id],
+    queryKey: ["tasks", id],
     queryFn: () => taskService.getTasks(id!),
     enabled: !!id,
-  })
+  });
 
   // Edit mutation
   const editMutation = useMutation({
     mutationFn: (data: { title?: string; description?: string }) =>
       projectService.updateProject(id!, data),
     onSuccess: (updatedProject) => {
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success(`"${updatedProject.title}" 프로젝트가 수정되었습니다.`)
-      setShowEditDialog(false)
+      queryClient.invalidateQueries({ queryKey: ["project", id] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success(`"${updatedProject.title}" 프로젝트가 수정되었습니다.`);
+      setShowEditDialog(false);
     },
     onError: () => {
-      toast.error('프로젝트 수정에 실패했습니다.')
+      toast.error("프로젝트 수정에 실패했습니다.");
     },
-  })
+  });
 
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: () => projectService.deleteProject(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      navigate('/dashboard')
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      navigate("/dashboard");
     },
-  })
+  });
 
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: (data: TaskCreateData) => taskService.createTask(id!, data),
     onSuccess: (newTask) => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', id] })
-      queryClient.invalidateQueries({ queryKey: ['project', id] })
-      toast.success(`"${newTask.title}" 태스크가 생성되었습니다.`)
-      setShowCreateTaskModal(false)
+      queryClient.invalidateQueries({ queryKey: ["tasks", id] });
+      queryClient.invalidateQueries({ queryKey: ["project", id] });
+      toast.success(`"${newTask.title}" 태스크가 생성되었습니다.`);
+      setShowCreateTaskModal(false);
     },
     onError: (error: unknown) => {
       // Extract error message from backend response
-      let errorMessage = '태스크 생성에 실패했습니다. 다시 시도해주세요.'
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { detail?: string } } }
+      let errorMessage = "태스크 생성에 실패했습니다. 다시 시도해주세요.";
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { detail?: string } };
+        };
         if (axiosError.response?.data?.detail) {
-          errorMessage = axiosError.response.data.detail
+          errorMessage = axiosError.response.data.detail;
         }
       }
-      toast.error(errorMessage)
+      toast.error(errorMessage);
     },
-  })
+  });
 
   const handleCreateTask = async (data: TaskCreateData) => {
-    await createTaskMutation.mutateAsync(data)
-  }
+    await createTaskMutation.mutateAsync(data);
+  };
 
-  const tasks = tasksData?.tasks ?? []
-  const taskCount = tasksData?.total ?? 0
+  const tasks = tasksData?.tasks ?? [];
+  const taskCount = tasksData?.total ?? 0;
 
   const handleOpenEditDialog = () => {
     if (project) {
-      setEditTitle(project.title)
-      setEditDescription(project.description || '')
-      setShowEditDialog(true)
+      setEditTitle(project.title);
+      setEditDescription(project.description || "");
+      setShowEditDialog(true);
     }
-  }
+  };
 
   const handleEdit = () => {
-    const updates: { title?: string; description?: string } = {}
+    const updates: { title?: string; description?: string } = {};
 
     if (editTitle.trim() !== project?.title) {
-      updates.title = editTitle.trim()
+      updates.title = editTitle.trim();
     }
-    if (editDescription !== (project?.description || '')) {
-      updates.description = editDescription
+    if (editDescription !== (project?.description || "")) {
+      updates.description = editDescription;
     }
 
     if (Object.keys(updates).length > 0) {
-      editMutation.mutate(updates)
+      editMutation.mutate(updates);
     } else {
-      setShowEditDialog(false)
+      setShowEditDialog(false);
     }
-  }
+  };
 
   const handleDelete = () => {
-    deleteMutation.mutate()
-  }
+    deleteMutation.mutate();
+  };
 
   // Loading state
   if (isLoading) {
@@ -176,7 +191,7 @@ export default function ProjectDetail() {
           <Skeleton className="h-24" />
         </div>
       </div>
-    )
+    );
   }
 
   // Error state
@@ -195,7 +210,7 @@ export default function ProjectDetail() {
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -213,7 +228,9 @@ export default function ProjectDetail() {
         <div>
           <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
           {project.description && (
-            <p className="text-muted-foreground text-lg">{project.description}</p>
+            <p className="text-muted-foreground text-lg">
+              {project.description}
+            </p>
           )}
         </div>
         <div className="flex gap-2">
@@ -242,7 +259,9 @@ export default function ProjectDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg font-semibold">{formatDate(project.createdAt)}</p>
+            <p className="text-lg font-semibold">
+              {formatDate(project.createdAt)}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -252,7 +271,9 @@ export default function ProjectDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg font-semibold">{formatDate(project.lastActivityAt)}</p>
+            <p className="text-lg font-semibold">
+              {formatDate(project.lastActivityAt)}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -272,8 +293,7 @@ export default function ProjectDetail() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>학습 태스크 타임라인</CardTitle>
           <Button size="sm" onClick={() => setShowCreateTaskModal(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            새 태스크
+            <Plus className="mr-2 h-4 w-4" />새 태스크
           </Button>
         </CardHeader>
         <CardContent>
@@ -285,7 +305,9 @@ export default function ProjectDetail() {
           ) : tasks.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <p className="mb-2">아직 태스크가 없습니다.</p>
-              <p className="text-sm">코드를 업로드하여 첫 번째 학습 태스크를 만들어보세요.</p>
+              <p className="text-sm">
+                코드를 업로드하여 첫 번째 학습 태스크를 만들어보세요.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -353,7 +375,7 @@ export default function ProjectDetail() {
                   저장 중...
                 </>
               ) : (
-                '저장'
+                "저장"
               )}
             </Button>
           </DialogFooter>
@@ -366,8 +388,8 @@ export default function ProjectDetail() {
           <AlertDialogHeader>
             <AlertDialogTitle>프로젝트를 삭제하시겠습니까?</AlertDialogTitle>
             <AlertDialogDescription>
-              "{project.title}" 프로젝트가 휴지통으로 이동됩니다.
-              30일 후 영구 삭제되며, 그 전에 복원할 수 있습니다.
+              "{project.title}" 프로젝트가 휴지통으로 이동됩니다. 30일 후 영구
+              삭제되며, 그 전에 복원할 수 있습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -376,11 +398,11 @@ export default function ProjectDetail() {
               onClick={handleDelete}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
-              {deleteMutation.isPending ? '삭제 중...' : '삭제'}
+              {deleteMutation.isPending ? "삭제 중..." : "삭제"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

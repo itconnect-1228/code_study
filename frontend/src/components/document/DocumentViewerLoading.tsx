@@ -1,22 +1,28 @@
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { AlertCircle, FileText, Loader2, RefreshCw, Sparkles } from 'lucide-react'
-import type { DocumentStatus } from '@/services/document-service'
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  AlertCircle,
+  FileText,
+  Loader2,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
+import type { DocumentStatus } from "@/services/document-service";
 
 export interface DocumentViewerLoadingProps {
   /** 현재 문서 상태 */
-  status: DocumentStatus
+  status: DocumentStatus;
   /** 생성 진행률 (0-100) */
-  progress?: number
+  progress?: number;
   /** 에러 메시지 */
-  errorMessage?: string
+  errorMessage?: string;
   /** 재시도 콜백 */
-  onRetry?: () => void
+  onRetry?: () => void;
   /** 문서 생성 시작 콜백 */
-  onGenerate?: () => void
+  onGenerate?: () => void;
   /** 추가 CSS 클래스 */
-  className?: string
+  className?: string;
 }
 
 /**
@@ -38,7 +44,7 @@ export function DocumentViewerLoading({
 }: DocumentViewerLoadingProps) {
   const renderContent = () => {
     switch (status) {
-      case 'pending':
+      case "pending":
         return (
           <div className="text-center space-y-6">
             <div className="flex justify-center">
@@ -61,15 +67,18 @@ export function DocumentViewerLoading({
               </Button>
             )}
           </div>
-        )
+        );
 
-      case 'generating':
+      case "generating":
         return (
           <div className="text-center space-y-6">
             <div className="flex justify-center">
               {progress !== undefined ? (
                 <div className="relative w-20 h-20">
-                  <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <svg
+                    className="w-full h-full -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
                     <circle
                       className="text-muted stroke-current"
                       strokeWidth="8"
@@ -119,9 +128,9 @@ export function DocumentViewerLoading({
               </div>
             )}
           </div>
-        )
+        );
 
-      case 'error':
+      case "error":
         return (
           <div className="text-center space-y-6">
             <div className="flex justify-center">
@@ -149,23 +158,23 @@ export function DocumentViewerLoading({
               </Button>
             )}
           </div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div
       className={cn(
-        'document-viewer-loading flex items-center justify-center min-h-[400px] p-8',
-        className
+        "document-viewer-loading flex items-center justify-center min-h-[400px] p-8",
+        className,
       )}
     >
       {renderContent()}
     </div>
-  )
+  );
 }
 
-export default DocumentViewerLoading
+export default DocumentViewerLoading;

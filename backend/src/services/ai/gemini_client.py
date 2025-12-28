@@ -27,12 +27,12 @@ from enum import Enum
 from typing import Any
 
 import google.generativeai as genai
-from google.generativeai.types import (
-    HarmCategory,
-    HarmBlockThreshold,
-    GenerationConfig,
-)
 from google.api_core import exceptions as google_exceptions
+from google.generativeai.types import (
+    GenerationConfig,
+    HarmBlockThreshold,
+    HarmCategory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -312,7 +312,11 @@ class GeminiClient:
         )
 
         file_context = f" (from file: {filename})" if filename else ""
-        extra_context = f"\n\nAdditional Context:\n{additional_context}" if additional_context else ""
+        extra_context = (
+            f"\n\nAdditional Context:\n{additional_context}"
+            if additional_context
+            else ""
+        )
 
         prompt = f"""Analyze the following {language} code{file_context} and create a comprehensive learning document.
 
@@ -400,7 +404,9 @@ Format your response as JSON with this structure:
         if conversation_history:
             history_text = "\n\nPrevious conversation:\n"
             for entry in conversation_history[-5:]:  # Last 5 exchanges
-                history_text += f"Q: {entry.get('question', '')}\nA: {entry.get('answer', '')}\n\n"
+                history_text += (
+                    f"Q: {entry.get('question', '')}\nA: {entry.get('answer', '')}\n\n"
+                )
 
         doc_context = ""
         if document_context:
@@ -484,7 +490,9 @@ Provide a clear, beginner-friendly answer. Include:
                     candidate = response.candidates[0]
                     if candidate.content and candidate.content.parts:
                         content = candidate.content.parts[0].text
-                    finish_reason = str(candidate.finish_reason) if candidate.finish_reason else ""
+                    finish_reason = (
+                        str(candidate.finish_reason) if candidate.finish_reason else ""
+                    )
 
                 # Extract usage stats
                 usage = {}
@@ -514,7 +522,7 @@ Provide a clear, beginner-friendly answer. Include:
                     latency_ms=latency_ms,
                 )
 
-            except asyncio.TimeoutError as e:
+            except TimeoutError as e:
                 last_error = e
                 logger.warning(
                     f"Gemini request timeout after {self.config.timeout}s "

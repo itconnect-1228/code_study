@@ -10,8 +10,7 @@ TDD Approach:
 """
 
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio
@@ -26,7 +25,7 @@ from src.services.code_analysis.code_upload_service import (
     CodeUploadService,
     UploadResult,
 )
-from src.services.code_analysis.file_storage import FileInfo, FileStorageService
+from src.services.code_analysis.file_storage import FileStorageService
 
 
 @pytest_asyncio.fixture

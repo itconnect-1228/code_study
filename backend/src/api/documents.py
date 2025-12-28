@@ -37,8 +37,12 @@ class ChaptersResponse(BaseModel):
     summary: dict[str, Any] = Field(..., description="Chapter 1: What This Code Does")
     prerequisites: dict[str, Any] = Field(..., description="Chapter 2: Prerequisites")
     coreLogic: dict[str, Any] = Field(..., description="Chapter 3: Code Structure")
-    lineByLine: dict[str, Any] = Field(..., description="Chapter 4: Line-by-Line Explanation")
-    syntaxReference: dict[str, Any] = Field(..., description="Chapter 5: Execution Flow")
+    lineByLine: dict[str, Any] = Field(
+        ..., description="Chapter 4: Line-by-Line Explanation"
+    )
+    syntaxReference: dict[str, Any] = Field(
+        ..., description="Chapter 5: Execution Flow"
+    )
     commonPatterns: dict[str, Any] = Field(..., description="Chapter 6: Core Concepts")
     exercises: dict[str, Any] = Field(..., description="Chapter 7: Common Mistakes")
 
@@ -82,14 +86,20 @@ def transform_content_to_chapters(content: dict[str, Any]) -> dict[str, Any]:
         # Parse line number from "1-3" format
         lines_str = item.get("lines", "0")
         try:
-            line_num = int(lines_str.split("-")[0]) if isinstance(lines_str, str) else int(lines_str)
+            line_num = (
+                int(lines_str.split("-")[0])
+                if isinstance(lines_str, str)
+                else int(lines_str)
+            )
         except (ValueError, AttributeError):
             line_num = 0
-        line_explanations.append({
-            "lineNumber": line_num,
-            "code": item.get("code", ""),
-            "explanation": item.get("what_it_does", ""),
-        })
+        line_explanations.append(
+            {
+                "lineNumber": line_num,
+                "code": item.get("code", ""),
+                "explanation": item.get("what_it_does", ""),
+            }
+        )
 
     # Transform Chapter 5: syntaxReference
     # AI: {step_number, what_happens, current_values, why_it_matters}
@@ -100,10 +110,13 @@ def transform_content_to_chapters(content: dict[str, Any]) -> dict[str, Any]:
         step_num = item.get("step_number", "")
         what_happens = item.get("what_happens", "")
         why_matters = item.get("why_it_matters", "")
-        syntax_items.append({
-            "syntax": f"Step {step_num}",
-            "description": f"{what_happens}" + (f" - {why_matters}" if why_matters else ""),
-        })
+        syntax_items.append(
+            {
+                "syntax": f"Step {step_num}",
+                "description": f"{what_happens}"
+                + (f" - {why_matters}" if why_matters else ""),
+            }
+        )
 
     # Transform Chapter 6: commonPatterns
     # AI: {name, what_it_is, why_used, where_applied, in_this_code}
@@ -111,10 +124,17 @@ def transform_content_to_chapters(content: dict[str, Any]) -> dict[str, Any]:
     raw_concepts = content.get("chapter6", {}).get("concepts", [])
     patterns = []
     for item in raw_concepts:
-        patterns.append({
-            "name": item.get("name", ""),
-            "description": item.get("what_it_is", "") + (f" {item.get('in_this_code', '')}" if item.get("in_this_code") else ""),
-        })
+        patterns.append(
+            {
+                "name": item.get("name", ""),
+                "description": item.get("what_it_is", "")
+                + (
+                    f" {item.get('in_this_code', '')}"
+                    if item.get("in_this_code")
+                    else ""
+                ),
+            }
+        )
 
     # Transform Chapter 7: exercises
     # AI: {mistake, wrong_code, right_code, why_it_matters, how_to_fix}
@@ -122,10 +142,12 @@ def transform_content_to_chapters(content: dict[str, Any]) -> dict[str, Any]:
     raw_mistakes = content.get("chapter7", {}).get("mistakes", [])
     exercises = []
     for item in raw_mistakes:
-        exercises.append({
-            "question": item.get("mistake", ""),
-            "hint": item.get("how_to_fix", ""),
-        })
+        exercises.append(
+            {
+                "question": item.get("mistake", ""),
+                "hint": item.get("how_to_fix", ""),
+            }
+        )
 
     return {
         "summary": {
@@ -242,7 +264,9 @@ async def get_document(
     return DocumentResponse(
         id=document.id,
         task_id=document.task_id,
-        status=transform_status_to_frontend(document.generation_status),  # Transform status
+        status=transform_status_to_frontend(
+            document.generation_status
+        ),  # Transform status
         chapters=transform_content_to_chapters(document.content),  # Transform content
         error_message=document.generation_error,  # Rename field
         created_at=document.created_at,
@@ -261,7 +285,9 @@ class GenerateDocumentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.post("/tasks/{task_id}/document/generate", response_model=GenerateDocumentResponse)
+@router.post(
+    "/tasks/{task_id}/document/generate", response_model=GenerateDocumentResponse
+)
 async def generate_document(
     task_id: UUID,
     db: Annotated[AsyncSession, Depends(get_session)],
@@ -296,9 +322,7 @@ async def generate_document(
     stmt = (
         select(Task)
         .where(Task.id == task_id)
-        .options(
-            selectinload(Task.uploaded_code).selectinload(UploadedCode.code_files)
-        )
+        .options(selectinload(Task.uploaded_code).selectinload(UploadedCode.code_files))
     )
     result = await db.execute(stmt)
     task = result.scalar_one_or_none()
@@ -311,6 +335,7 @@ async def generate_document(
 
     # Validate ownership via project
     from src.services.task_service import TaskService
+
     task_service = TaskService(db)
     if not await task_service.validate_ownership(task_id, current_user.id):
         raise HTTPException(
@@ -344,7 +369,11 @@ async def generate_document(
 
     combined_code = "\n\n".join(code_contents)
     language = task.uploaded_code.detected_language or "Unknown"
-    filename = task.uploaded_code.code_files[0].file_name if task.uploaded_code.code_files else None
+    filename = (
+        task.uploaded_code.code_files[0].file_name
+        if task.uploaded_code.code_files
+        else None
+    )
 
     # Generate document
     doc_service = DocumentGenerationService(db)
@@ -359,7 +388,9 @@ async def generate_document(
         return GenerateDocumentResponse(
             id=document.id,
             task_id=document.task_id,
-            status=transform_status_to_frontend(document.generation_status),  # Transform status
+            status=transform_status_to_frontend(
+                document.generation_status
+            ),  # Transform status
             message="Document generation completed",
         )
     except Exception as e:
@@ -369,12 +400,16 @@ async def generate_document(
             return GenerateDocumentResponse(
                 id=existing_doc.id,
                 task_id=existing_doc.task_id,
-                status=transform_status_to_frontend(existing_doc.generation_status),  # Transform status
-                message=str(e) if existing_doc.is_failed else "Document generation in progress",
+                status=transform_status_to_frontend(
+                    existing_doc.generation_status
+                ),  # Transform status
+                message=str(e)
+                if existing_doc.is_failed
+                else "Document generation in progress",
             )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Document generation failed: {str(e)}",
+            detail=f"Document generation failed: {e!s}",
         )
 
 

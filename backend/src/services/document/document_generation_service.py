@@ -50,7 +50,6 @@ from src.models.task import Task
 from src.services.ai.gemini_client import (
     ContentType,
     GeminiClient,
-    GeminiConfig,
     GeminiError,
     GeminiRateLimitError,
     GeminiTimeoutError,
@@ -358,7 +357,9 @@ class DocumentGenerationService:
             status_info["error"] = document.generation_error
 
         if document.is_in_progress and document.generation_started_at:
-            elapsed = (datetime.now(UTC) - document.generation_started_at).total_seconds()
+            elapsed = (
+                datetime.now(UTC) - document.generation_started_at
+            ).total_seconds()
             # Estimate based on 3-minute target
             estimated_remaining = max(0, 180 - elapsed)
             status_info["estimated_time_remaining"] = int(estimated_remaining)
@@ -637,9 +638,7 @@ class DocumentGenerationService:
         """
         # Check for required chapters
         missing_chapters = [
-            chapter
-            for chapter in self.REQUIRED_CHAPTERS
-            if chapter not in content
+            chapter for chapter in self.REQUIRED_CHAPTERS if chapter not in content
         ]
 
         if missing_chapters:
@@ -727,6 +726,9 @@ class DocumentGenerationService:
             return False, f"Code exceeds maximum line count ({lines} > {max_lines})"
 
         if len(code) > max_chars:
-            return False, f"Code exceeds maximum character count ({len(code)} > {max_chars})"
+            return (
+                False,
+                f"Code exceeds maximum character count ({len(code)} > {max_chars})",
+            )
 
         return True, None

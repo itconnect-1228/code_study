@@ -1,14 +1,20 @@
-import { useRef, useState, useCallback, type DragEvent, type ChangeEvent } from 'react'
-import { Upload } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import {
+  useRef,
+  useState,
+  useCallback,
+  type DragEvent,
+  type ChangeEvent,
+} from "react";
+import { Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export interface FileUploadProps {
-  onFileSelect: (files: File[]) => void
-  onError?: (message: string) => void
-  acceptedTypes?: string[]
-  maxSize?: number
-  disabled?: boolean
+  onFileSelect: (files: File[]) => void;
+  onError?: (message: string) => void;
+  acceptedTypes?: string[];
+  maxSize?: number;
+  disabled?: boolean;
 }
 
 /**
@@ -28,92 +34,94 @@ export function FileUpload({
   maxSize,
   disabled = false,
 }: FileUploadProps) {
-  const [isDragOver, setIsDragOver] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFiles = useCallback(
     (files: File[]): File[] | null => {
       if (maxSize) {
-        const oversizedFile = files.find((file) => file.size > maxSize)
+        const oversizedFile = files.find((file) => file.size > maxSize);
         if (oversizedFile) {
-          onError?.(`파일 크기가 너무 큽니다: ${oversizedFile.name}`)
-          return null
+          onError?.(`파일 크기가 너무 큽니다: ${oversizedFile.name}`);
+          return null;
         }
       }
-      return files
+      return files;
     },
-    [maxSize, onError]
-  )
+    [maxSize, onError],
+  );
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
-      if (!files || files.length === 0) return
+      if (!files || files.length === 0) return;
 
-      const fileArray = Array.from(files)
-      const validatedFiles = validateFiles(fileArray)
+      const fileArray = Array.from(files);
+      const validatedFiles = validateFiles(fileArray);
 
       if (validatedFiles) {
-        onFileSelect(validatedFiles)
+        onFileSelect(validatedFiles);
       }
     },
-    [onFileSelect, validateFiles]
-  )
+    [onFileSelect, validateFiles],
+  );
 
   const handleDragEnter = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
+      e.preventDefault();
+      e.stopPropagation();
       if (!disabled) {
-        setIsDragOver(true)
+        setIsDragOver(true);
       }
     },
-    [disabled]
-  )
+    [disabled],
+  );
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragOver(false)
-  }, [])
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }, [])
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
 
   const handleDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setIsDragOver(false)
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
 
-      if (disabled) return
+      if (disabled) return;
 
-      handleFiles(e.dataTransfer.files)
+      handleFiles(e.dataTransfer.files);
     },
-    [disabled, handleFiles]
-  )
+    [disabled, handleFiles],
+  );
 
   const handleFileInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      handleFiles(e.target.files)
+      handleFiles(e.target.files);
       // Reset input value to allow selecting the same file again
-      e.target.value = ''
+      e.target.value = "";
     },
-    [handleFiles]
-  )
+    [handleFiles],
+  );
 
   const handleButtonClick = useCallback(() => {
-    fileInputRef.current?.click()
-  }, [])
+    fileInputRef.current?.click();
+  }, []);
 
   return (
     <div
       data-testid="file-drop-zone"
       className={cn(
-        'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
-        isDragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25',
-        disabled && 'opacity-50 cursor-not-allowed'
+        "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+        isDragOver
+          ? "border-primary bg-primary/5"
+          : "border-muted-foreground/25",
+        disabled && "opacity-50 cursor-not-allowed",
       )}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -137,17 +145,17 @@ export function FileUpload({
         type="file"
         className="hidden"
         multiple
-        accept={acceptedTypes?.join(',')}
+        accept={acceptedTypes?.join(",")}
         onChange={handleFileInputChange}
         disabled={disabled}
       />
       {acceptedTypes && (
         <p className="text-xs text-muted-foreground mt-4">
-          지원 형식: {acceptedTypes.join(', ')}
+          지원 형식: {acceptedTypes.join(", ")}
         </p>
       )}
     </div>
-  )
+  );
 }
 
-export default FileUpload
+export default FileUpload;

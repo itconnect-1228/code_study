@@ -29,7 +29,7 @@ class TestPasswordHashing:
         """Hash should be different from the original password."""
         from src.utils.security import hash_password
 
-        password = "my-secret-password"  # noqa: S105
+        password = "my-secret-password"
         result = hash_password(password)
 
         assert result != password
@@ -38,7 +38,7 @@ class TestPasswordHashing:
         """Same password should produce different hashes due to salt."""
         from src.utils.security import hash_password
 
-        password = "test-password"  # noqa: S105
+        password = "test-password"
         hash1 = hash_password(password)
         hash2 = hash_password(password)
 
@@ -89,7 +89,7 @@ class TestPasswordHashing:
         """hash_password should handle special characters."""
         from src.utils.security import hash_password
 
-        password = 'p@$$w0rd!#%^&*(){}[]|\\:";<>,.?/'  # noqa: S105
+        password = 'p@$$w0rd!#%^&*(){}[]|\\:";<>,.?/'
         result = hash_password(password)
 
         assert isinstance(result, str)
@@ -116,7 +116,7 @@ class TestPasswordVerification:
         """verify_password should return True for correct password."""
         from src.utils.security import hash_password, verify_password
 
-        password = "correct-password"  # noqa: S105
+        password = "correct-password"
         hashed = hash_password(password)
 
         result = verify_password(password, hashed)
@@ -127,7 +127,7 @@ class TestPasswordVerification:
         """verify_password should return False for wrong password."""
         from src.utils.security import hash_password, verify_password
 
-        password = "correct-password"  # noqa: S105
+        password = "correct-password"
         hashed = hash_password(password)
 
         result = verify_password("wrong-password", hashed)
@@ -138,7 +138,7 @@ class TestPasswordVerification:
         """Password verification should be case-sensitive."""
         from src.utils.security import hash_password, verify_password
 
-        password = "Password123"  # noqa: S105
+        password = "Password123"
         hashed = hash_password(password)
 
         # Different case should fail
@@ -161,7 +161,7 @@ class TestPasswordVerification:
         """verify_password should handle unicode passwords."""
         from src.utils.security import hash_password, verify_password
 
-        password = "비밀번호123"  # noqa: S105
+        password = "비밀번호123"
         hashed = hash_password(password)
 
         assert verify_password("비밀번호123", hashed) is True
@@ -171,7 +171,7 @@ class TestPasswordVerification:
         """verify_password should handle special characters."""
         from src.utils.security import hash_password, verify_password
 
-        password = "!@#$%^&*()_+-=[]{}|;':\",./<>?"  # noqa: S105
+        password = "!@#$%^&*()_+-=[]{}|;':\",./<>?"
         hashed = hash_password(password)
 
         assert verify_password(password, hashed) is True
@@ -190,7 +190,7 @@ class TestPasswordVerification:
         """verify_password should return False for tampered hash."""
         from src.utils.security import hash_password, verify_password
 
-        password = "test-password"  # noqa: S105
+        password = "test-password"
         hashed = hash_password(password)
 
         # Tamper with the hash

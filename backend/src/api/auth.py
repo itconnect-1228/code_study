@@ -44,7 +44,9 @@ ACCESS_TOKEN_COOKIE = "access_token"  # noqa: S105
 COOKIE_MAX_AGE = 7 * 24 * 60 * 60  # 7 days in seconds
 ACCESS_COOKIE_MAX_AGE = 15 * 60  # 15 minutes
 # Cookie settings - detect production environment
-_is_production = bool(os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("PRODUCTION", "").lower() == "true")
+_is_production = bool(
+    os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("PRODUCTION", "").lower() == "true"
+)
 COOKIE_HTTPONLY = True
 COOKIE_SECURE = _is_production  # True in production (HTTPS required)
 COOKIE_SAMESITE: str = "none" if _is_production else "lax"  # "none" for cross-origin
@@ -54,7 +56,7 @@ COOKIE_SAMESITE: str = "none" if _is_production else "lax"  # "none" for cross-o
 async def register(
     request: RegisterRequest,
     response: Response,
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    db: AsyncSession = Depends(get_session),
 ) -> dict:
     """Register a new user account with automatic login.
 
@@ -130,7 +132,7 @@ async def register(
 async def login(
     request: LoginRequest,
     response: Response,
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    db: AsyncSession = Depends(get_session),
 ) -> dict:
     """Authenticate user and return JWT tokens.
 
@@ -195,8 +197,8 @@ async def login(
 @router.post("/logout", response_model=MessageResponse)
 async def logout(
     response: Response,
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
 ) -> dict:
     """Logout user and revoke refresh token.
 
@@ -226,7 +228,7 @@ async def logout(
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh(
     response: Response,
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    db: AsyncSession = Depends(get_session),
     refresh_token: str | None = Cookie(None, alias="refresh_token"),
 ) -> dict:
     """Refresh access token using refresh token.
@@ -310,7 +312,7 @@ async def refresh(
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(get_current_user),
 ) -> User:
     """Get current authenticated user information.
 

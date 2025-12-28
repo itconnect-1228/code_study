@@ -735,9 +735,7 @@ class TestTaskSequentialNumber:
 
         # Query and verify order
         result = await db_session.execute(
-            select(Task)
-            .where(Task.project_id == project.id)
-            .order_by(Task.task_number)
+            select(Task).where(Task.project_id == project.id).order_by(Task.task_number)
         )
         tasks = result.scalars().all()
 

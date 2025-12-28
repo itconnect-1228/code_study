@@ -15,10 +15,10 @@ from src.services.code_analysis.complexity_analyzer import (
     CodeComplexity,
     ComplexityLevel,
     analyze_complexity,
-    count_lines,
     calculate_nesting_depth,
-    count_functions,
     count_classes,
+    count_functions,
+    count_lines,
     determine_complexity_level,
 )
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     def test_javascript_code_lines(self):
         """Should count lines in JavaScript code."""
-        code = '''// Comment
+        code = """// Comment
 function greet() {
     /* Multi-line
        comment */
@@ -117,7 +117,7 @@ function greet() {
 }
 
 greet();
-'''
+"""
         result = count_lines(code, language="javascript")
 
         assert result["total"] == 9
@@ -394,11 +394,11 @@ class TestAnalyzeComplexity:
 
     def test_simple_python_code(self):
         """Should analyze simple Python code."""
-        code = '''def hello():
+        code = """def hello():
     print("Hello, World!")
 
 hello()
-'''
+"""
         result = analyze_complexity(code, language="python")
 
         assert isinstance(result, CodeComplexity)
@@ -444,7 +444,7 @@ if __name__ == "__main__":
 
     def test_javascript_code(self):
         """Should analyze JavaScript code."""
-        code = '''function greet(name) {
+        code = """function greet(name) {
     if (name) {
         console.log("Hello, " + name);
     } else {
@@ -461,7 +461,7 @@ class Person {
         greet(this.name);
     }
 }
-'''
+"""
         result = analyze_complexity(code, language="javascript")
 
         assert result.total_lines > 0
@@ -491,7 +491,7 @@ print(x + y)
 
     def test_java_code(self):
         """Should analyze Java code."""
-        code = '''public class HelloWorld {
+        code = """public class HelloWorld {
     public static void main(String[] args) {
         System.out.println("Hello, World!");
     }
@@ -500,7 +500,7 @@ print(x + y)
         return a + b;
     }
 }
-'''
+"""
         result = analyze_complexity(code, language="java")
 
         assert result.class_count >= 1
@@ -509,7 +509,7 @@ print(x + y)
     def test_complex_code_detection(self):
         """Should detect complex code patterns."""
         # Deeply nested, many functions
-        code = '''def level1():
+        code = """def level1():
     def level2():
         def level3():
             if True:
@@ -532,7 +532,7 @@ def func10(): pass
 class A: pass
 class B: pass
 class C: pass
-'''
+"""
         result = analyze_complexity(code, language="python")
 
         assert result.function_count >= 10
@@ -603,7 +603,9 @@ def authenticate(username: str, password: str, users: dict) -> User:
         result = analyze_complexity(code, language="python")
 
         assert result.total_lines > 40
-        assert result.function_count >= 4  # set_password, verify_password, authenticate, __init__
+        assert (
+            result.function_count >= 4
+        )  # set_password, verify_password, authenticate, __init__
         assert result.class_count >= 2  # AuthenticationError, User
         assert result.complexity_level in [
             ComplexityLevel.BEGINNER,
@@ -612,7 +614,7 @@ def authenticate(username: str, password: str, users: dict) -> User:
 
     def test_typescript_react_component(self):
         """Should analyze a TypeScript React component."""
-        code = '''import React, { useState, useEffect } from 'react';
+        code = """import React, { useState, useEffect } from 'react';
 
 interface Props {
     title: string;
@@ -653,7 +655,7 @@ const ItemList: React.FC<Props> = ({ title, items }) => {
 };
 
 export default ItemList;
-'''
+"""
         result = analyze_complexity(code, language="typescript")
 
         assert result.total_lines > 30

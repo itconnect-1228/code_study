@@ -16,7 +16,11 @@ from fastapi import APIRouter, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.dependencies import get_current_user
-from src.api.exceptions import AuthorizationException, NotFoundException, ValidationException
+from src.api.exceptions import (
+    AuthorizationException,
+    NotFoundException,
+    ValidationException,
+)
 from src.api.schemas import (
     CreateProjectRequest,
     ProjectListResponse,
@@ -32,8 +36,8 @@ router = APIRouter()
 
 @router.get("", response_model=ProjectListResponse)
 async def get_projects(
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
     include_trashed: bool = False,
 ) -> dict:
     """Get all projects for the current user.
@@ -63,8 +67,8 @@ async def get_projects(
 @router.post("", response_model=ProjectResponse, status_code=201)
 async def create_project(
     request: CreateProjectRequest,
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
 ) -> ProjectResponse:
     """Create a new project.
 
@@ -101,8 +105,8 @@ async def create_project(
 @router.get("/{project_id}", response_model=ProjectResponse)
 async def get_project(
     project_id: UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
 ) -> ProjectResponse:
     """Get a specific project by ID.
 
@@ -144,8 +148,8 @@ async def get_project(
 async def update_project(
     project_id: UUID,
     request: UpdateProjectRequest,
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
 ) -> ProjectResponse:
     """Update a project's title or description.
 
@@ -195,8 +199,8 @@ async def update_project(
 @router.post("/{project_id}/restore", response_model=ProjectResponse)
 async def restore_project(
     project_id: UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
 ) -> ProjectResponse:
     """Restore a project from trash.
 
@@ -248,8 +252,8 @@ async def restore_project(
 @router.delete("/{project_id}", status_code=204)
 async def delete_project(
     project_id: UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
 ) -> Response:
     """Soft delete a project (move to trash).
 
@@ -295,8 +299,8 @@ async def delete_project(
 @router.delete("/{project_id}/permanent", status_code=204)
 async def permanent_delete_project(
     project_id: UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_session),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
 ) -> Response:
     """Permanently delete a project from trash.
 

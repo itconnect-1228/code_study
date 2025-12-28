@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,32 +6,32 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileUpload } from '@/components/upload/FileUpload'
-import { FolderUpload } from '@/components/upload/FolderUpload'
-import { PasteCode, type PasteCodeData } from '@/components/upload/PasteCode'
-import { FileCode, FolderOpen, ClipboardPaste } from 'lucide-react'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileUpload } from "@/components/upload/FileUpload";
+import { FolderUpload } from "@/components/upload/FolderUpload";
+import { PasteCode, type PasteCodeData } from "@/components/upload/PasteCode";
+import { FileCode, FolderOpen, ClipboardPaste } from "lucide-react";
 
 export interface TaskCreateData {
-  title: string
-  uploadType: 'file' | 'folder' | 'paste'
-  files?: File[]
-  code?: string
-  language?: string
+  title: string;
+  uploadType: "file" | "folder" | "paste";
+  files?: File[];
+  code?: string;
+  language?: string;
 }
 
 export interface CreateTaskModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (data: TaskCreateData) => Promise<void>
-  languages: string[]
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: TaskCreateData) => Promise<void>;
+  languages: string[];
 }
 
-type UploadTab = 'file' | 'folder' | 'paste'
+type UploadTab = "file" | "folder" | "paste";
 
 /**
  * CreateTaskModal - Modal for creating a new task with code upload
@@ -48,115 +48,118 @@ export function CreateTaskModal({
   onSubmit,
   languages,
 }: CreateTaskModalProps) {
-  const [title, setTitle] = useState('')
-  const [activeTab, setActiveTab] = useState<UploadTab>('file')
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [pastedCode, setPastedCode] = useState<PasteCodeData | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [title, setTitle] = useState("");
+  const [activeTab, setActiveTab] = useState<UploadTab>("file");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [pastedCode, setPastedCode] = useState<PasteCodeData | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const resetForm = useCallback(() => {
-    setTitle('')
-    setActiveTab('file')
-    setSelectedFiles([])
-    setPastedCode(null)
-    setError(null)
-  }, [])
+    setTitle("");
+    setActiveTab("file");
+    setSelectedFiles([]);
+    setPastedCode(null);
+    setError(null);
+  }, []);
 
   const handleFileSelect = useCallback((files: File[]) => {
-    setSelectedFiles(files)
-    setError(null)
-  }, [])
+    setSelectedFiles(files);
+    setError(null);
+  }, []);
 
   const handleFolderSelect = useCallback((files: File[]) => {
-    setSelectedFiles(files)
-    setError(null)
-  }, [])
+    setSelectedFiles(files);
+    setError(null);
+  }, []);
 
   const handlePaste = useCallback((data: PasteCodeData) => {
-    setPastedCode(data)
-    setError(null)
-  }, [])
+    setPastedCode(data);
+    setError(null);
+  }, []);
 
   const handleUploadError = useCallback((message: string) => {
-    setError(message)
-  }, [])
+    setError(message);
+  }, []);
 
   const isFormValid = useCallback(() => {
-    if (!title.trim()) return false
+    if (!title.trim()) return false;
 
     switch (activeTab) {
-      case 'file':
-      case 'folder':
-        return selectedFiles.length > 0
-      case 'paste':
-        return pastedCode !== null && pastedCode.code.trim().length > 0
+      case "file":
+      case "folder":
+        return selectedFiles.length > 0;
+      case "paste":
+        return pastedCode !== null && pastedCode.code.trim().length > 0;
       default:
-        return false
+        return false;
     }
-  }, [title, activeTab, selectedFiles, pastedCode])
+  }, [title, activeTab, selectedFiles, pastedCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
 
     if (!title.trim()) {
-      setError('제목을 입력해주세요.')
-      return
+      setError("제목을 입력해주세요.");
+      return;
     }
 
-    if (activeTab === 'paste' && !pastedCode?.code.trim()) {
-      setError('코드를 입력해주세요.')
-      return
+    if (activeTab === "paste" && !pastedCode?.code.trim()) {
+      setError("코드를 입력해주세요.");
+      return;
     }
 
-    if ((activeTab === 'file' || activeTab === 'folder') && selectedFiles.length === 0) {
-      setError('파일을 선택해주세요.')
-      return
+    if (
+      (activeTab === "file" || activeTab === "folder") &&
+      selectedFiles.length === 0
+    ) {
+      setError("파일을 선택해주세요.");
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      let data: TaskCreateData
+      let data: TaskCreateData;
 
-      if (activeTab === 'paste' && pastedCode) {
+      if (activeTab === "paste" && pastedCode) {
         data = {
           title: title.trim(),
-          uploadType: 'paste',
+          uploadType: "paste",
           code: pastedCode.code,
           language: pastedCode.language,
-        }
+        };
       } else {
         data = {
           title: title.trim(),
           uploadType: activeTab,
           files: selectedFiles,
-        }
+        };
       }
 
-      await onSubmit(data)
-      resetForm()
-      onOpenChange(false)
-    } catch (err) {
-      setError('태스크 생성에 실패했습니다. 다시 시도해주세요.')
+      await onSubmit(data);
+      resetForm();
+      onOpenChange(false);
+    } catch {
+      setError("태스크 생성에 실패했습니다. 다시 시도해주세요.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleClose = () => {
     if (!isSubmitting) {
-      resetForm()
-      onOpenChange(false)
+      resetForm();
+      onOpenChange(false);
     }
-  }
+  };
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value as UploadTab)
-    setSelectedFiles([])
-    setPastedCode(null)
-    setError(null)
-  }
+    setActiveTab(value as UploadTab);
+    setSelectedFiles([]);
+    setPastedCode(null);
+    setError(null);
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -204,7 +207,7 @@ export function CreateTaskModal({
                   onError={handleUploadError}
                   disabled={isSubmitting}
                 />
-                {selectedFiles.length > 0 && activeTab === 'file' && (
+                {selectedFiles.length > 0 && activeTab === "file" && (
                   <p className="text-sm text-muted-foreground mt-2">
                     {selectedFiles.length}개 파일 선택됨
                   </p>
@@ -217,7 +220,7 @@ export function CreateTaskModal({
                   onError={handleUploadError}
                   disabled={isSubmitting}
                 />
-                {selectedFiles.length > 0 && activeTab === 'folder' && (
+                {selectedFiles.length > 0 && activeTab === "folder" && (
                   <p className="text-sm text-muted-foreground mt-2">
                     {selectedFiles.length}개 파일 선택됨
                   </p>
@@ -233,23 +236,26 @@ export function CreateTaskModal({
               </TabsContent>
             </Tabs>
 
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               취소
             </Button>
             <Button type="submit" disabled={isSubmitting || !isFormValid()}>
-              {isSubmitting ? '생성 중...' : '태스크 만들기'}
+              {isSubmitting ? "생성 중..." : "태스크 만들기"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default CreateTaskModal
+export default CreateTaskModal;

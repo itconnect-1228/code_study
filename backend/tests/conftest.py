@@ -31,8 +31,8 @@ from src.models.learning_document import LearningDocument  # noqa: F401
 from src.models.project import Project  # noqa: F401
 from src.models.refresh_token import RefreshToken  # noqa: F401
 from src.models.task import Task  # noqa: F401
-from src.models.user import User  # noqa: F401
 from src.models.uploaded_code import UploadedCode  # noqa: F401
+from src.models.user import User  # noqa: F401
 
 
 def _adapt_jsonb_for_sqlite():

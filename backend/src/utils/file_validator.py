@@ -15,8 +15,7 @@ Requirements:
 - FR-018: System MUST allow 1-20 files per upload
 """
 
-import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 # Configuration constants
@@ -27,18 +26,18 @@ MAX_FILE_COUNT = 20  # FR-018
 # Allowed file extensions (FR-015)
 # Must match SUPPORTED_EXTENSIONS in CodeFile model
 ALLOWED_EXTENSIONS: set[str] = {
-    ".py",    # Python
-    ".js",    # JavaScript
-    ".ts",    # TypeScript
-    ".jsx",   # JavaScript React
-    ".tsx",   # TypeScript React
+    ".py",  # Python
+    ".js",  # JavaScript
+    ".ts",  # TypeScript
+    ".jsx",  # JavaScript React
+    ".tsx",  # TypeScript React
     ".html",  # HTML
-    ".css",   # CSS
+    ".css",  # CSS
     ".java",  # Java
-    ".cpp",   # C++
-    ".c",     # C
-    ".txt",   # Text
-    ".md",    # Markdown
+    ".cpp",  # C++
+    ".c",  # C
+    ".txt",  # Text
+    ".md",  # Markdown
 }
 
 # Excluded paths/patterns (FR-017)
@@ -71,14 +70,14 @@ EXCLUDED_PATHS: set[str] = {
 
 # Binary file signatures (magic bytes) for detection
 BINARY_SIGNATURES: list[bytes] = [
-    b"MZ",           # Windows executable
-    b"\x89PNG",      # PNG image
-    b"\xff\xd8\xff", # JPEG image
-    b"GIF8",         # GIF image
-    b"PK\x03\x04",   # ZIP archive
-    b"\x1f\x8b",     # GZIP
-    b"Rar!",         # RAR archive
-    b"\x7fELF",      # ELF executable (Linux)
+    b"MZ",  # Windows executable
+    b"\x89PNG",  # PNG image
+    b"\xff\xd8\xff",  # JPEG image
+    b"GIF8",  # GIF image
+    b"PK\x03\x04",  # ZIP archive
+    b"\x1f\x8b",  # GZIP
+    b"Rar!",  # RAR archive
+    b"\x7fELF",  # ELF executable (Linux)
     b"\xca\xfe\xba\xbe",  # Mach-O (macOS)
 ]
 
@@ -297,7 +296,7 @@ def validate_file(filename: str, content: bytes) -> ValidationResult:
         return ValidationResult(
             is_valid=False,
             error_message=f"File path is excluded: {filename}. "
-                         "Common build/system folders are automatically excluded."
+            "Common build/system folders are automatically excluded.",
         )
 
     # Check file extension
@@ -306,7 +305,7 @@ def validate_file(filename: str, content: bytes) -> ValidationResult:
         return ValidationResult(
             is_valid=False,
             error_message=f"Unsupported file format. "
-                         f"Allowed extensions: {allowed_list}"
+            f"Allowed extensions: {allowed_list}",
         )
 
     # Check file size
@@ -314,7 +313,7 @@ def validate_file(filename: str, content: bytes) -> ValidationResult:
         size_mb = len(content) / (1024 * 1024)
         return ValidationResult(
             is_valid=False,
-            error_message=f"File size ({size_mb:.1f}MB) exceeds maximum limit of 10MB."
+            error_message=f"File size ({size_mb:.1f}MB) exceeds maximum limit of 10MB.",
         )
 
     # Check for binary content
@@ -322,16 +321,14 @@ def validate_file(filename: str, content: bytes) -> ValidationResult:
         return ValidationResult(
             is_valid=False,
             error_message="Only source code text files are supported. "
-                         "Please upload .py, .js, .html, or other text-based code files."
+            "Please upload .py, .js, .html, or other text-based code files.",
         )
 
     # All checks passed
     return ValidationResult(is_valid=True)
 
 
-def validate_upload(
-    files: list[tuple[str, bytes]]
-) -> ValidationResult:
+def validate_upload(files: list[tuple[str, bytes]]) -> ValidationResult:
     """
     Validate an entire upload batch.
 
@@ -358,12 +355,12 @@ def validate_upload(
         if len(files) == 0:
             return ValidationResult(
                 is_valid=False,
-                error_message="No files provided. Please upload at least one file."
+                error_message="No files provided. Please upload at least one file.",
             )
         return ValidationResult(
             is_valid=False,
             error_message=f"Maximum 20 files per upload. "
-                         f"You provided {len(files)} files."
+            f"You provided {len(files)} files.",
         )
 
     # Check total size
@@ -372,7 +369,7 @@ def validate_upload(
         total_mb = total_size / (1024 * 1024)
         return ValidationResult(
             is_valid=False,
-            error_message=f"Total upload size ({total_mb:.1f}MB) exceeds maximum limit of 10MB."
+            error_message=f"Total upload size ({total_mb:.1f}MB) exceeds maximum limit of 10MB.",
         )
 
     # Validate each file

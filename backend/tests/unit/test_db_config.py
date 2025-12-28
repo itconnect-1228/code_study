@@ -8,7 +8,7 @@ Tests cover:
 - Error handling for missing/invalid configuration
 """
 
-# ruff: noqa: S105, S106  # Test passwords are intentionally hardcoded
+# Test passwords are intentionally hardcoded
 
 import os
 from unittest.mock import patch

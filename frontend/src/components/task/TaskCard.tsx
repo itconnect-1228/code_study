@@ -1,43 +1,43 @@
-import { Link } from 'react-router-dom'
-import { FileCode, FolderOpen, ClipboardPaste } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
-import type { Task } from '@/services/task-service'
+import { Link } from "react-router-dom";
+import { FileCode, FolderOpen, ClipboardPaste } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { Task } from "@/services/task-service";
 
-export type TaskStatus = 'pending' | 'generating' | 'completed' | 'error'
-export type UploadType = 'file' | 'folder' | 'paste'
+export type TaskStatus = "pending" | "generating" | "completed" | "error";
+export type UploadType = "file" | "folder" | "paste";
 
 // Re-export Task type for backwards compatibility
-export type { Task }
+export type { Task };
 
 export interface TaskCardProps {
-  task: Task
-  onClick?: (task: Task) => void
-  isLast?: boolean
+  task: Task;
+  onClick?: (task: Task) => void;
+  isLast?: boolean;
 }
 
 const uploadTypeConfig = {
   file: {
-    label: '파일',
+    label: "파일",
     icon: FileCode,
   },
   folder: {
-    label: '폴더',
+    label: "폴더",
     icon: FolderOpen,
   },
   paste: {
-    label: '붙여넣기',
+    label: "붙여넣기",
     icon: ClipboardPaste,
   },
-}
+};
 
 function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const date = new Date(dateString);
+  return date.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 /**
@@ -50,16 +50,16 @@ function formatDate(dateString: string): string {
  */
 export function TaskCard({ task, onClick, isLast = false }: TaskCardProps) {
   // Get upload type config, fallback to 'file' if uploadMethod is null
-  const uploadMethod = task.uploadMethod || 'file'
-  const uploadType = uploadTypeConfig[uploadMethod]
-  const UploadIcon = uploadType.icon
+  const uploadMethod = task.uploadMethod || "file";
+  const uploadType = uploadTypeConfig[uploadMethod];
+  const UploadIcon = uploadType.icon;
 
   const cardContent = (
     <Card
       role="article"
       className={cn(
-        'transition-all cursor-pointer hover:shadow-md',
-        onClick && 'active:scale-[0.99]'
+        "transition-all cursor-pointer hover:shadow-md",
+        onClick && "active:scale-[0.99]",
       )}
       onClick={onClick ? () => onClick(task) : undefined}
     >
@@ -83,15 +83,12 @@ export function TaskCard({ task, onClick, isLast = false }: TaskCardProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 
   return (
     <div
       data-testid="task-card-container"
-      className={cn(
-        'relative',
-        !isLast && 'task-card-with-connector pb-4'
-      )}
+      className={cn("relative", !isLast && "task-card-with-connector pb-4")}
     >
       {onClick ? (
         cardContent
@@ -99,7 +96,7 @@ export function TaskCard({ task, onClick, isLast = false }: TaskCardProps) {
         <Link to={`/tasks/${task.id}`}>{cardContent}</Link>
       )}
     </div>
-  )
+  );
 }
 
-export default TaskCard
+export default TaskCard;

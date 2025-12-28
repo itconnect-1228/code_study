@@ -1,41 +1,41 @@
-import { apiClient } from './api-client'
+import { apiClient } from "./api-client";
 
 /**
  * Backend project response format (snake_case)
  */
 interface ProjectResponseDTO {
-  id: string
-  title: string
-  description: string | null
-  created_at: string
-  updated_at: string
-  last_activity_at: string
-  deletion_status: string
-  trashed_at: string | null
+  id: string;
+  title: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  last_activity_at: string;
+  deletion_status: string;
+  trashed_at: string | null;
 }
 
 interface ProjectListResponseDTO {
-  projects: ProjectResponseDTO[]
-  total: number
+  projects: ProjectResponseDTO[];
+  total: number;
 }
 
 /**
  * Frontend project format (camelCase)
  */
 export interface Project {
-  id: string
-  title: string
-  description: string | null
-  createdAt: string
-  updatedAt: string
-  lastActivityAt: string
-  deletionStatus: string
-  trashedAt: string | null
+  id: string;
+  title: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  lastActivityAt: string;
+  deletionStatus: string;
+  trashedAt: string | null;
 }
 
 export interface ProjectListResponse {
-  projects: Project[]
-  total: number
+  projects: Project[];
+  total: number;
 }
 
 /**
@@ -50,7 +50,7 @@ const transformProject = (dto: ProjectResponseDTO): Project => ({
   lastActivityAt: dto.last_activity_at,
   deletionStatus: dto.deletion_status,
   trashedAt: dto.trashed_at,
-})
+});
 
 /**
  * Project service - handles all project-related API calls
@@ -62,13 +62,15 @@ export const projectService = {
    * @returns List of projects
    */
   async getProjects(includeTrashed = false): Promise<ProjectListResponse> {
-    const params = includeTrashed ? { include_trashed: true } : {}
-    const response = await apiClient.get<ProjectListResponseDTO>('/projects', { params })
+    const params = includeTrashed ? { include_trashed: true } : {};
+    const response = await apiClient.get<ProjectListResponseDTO>("/projects", {
+      params,
+    });
 
     return {
       projects: response.data.projects.map(transformProject),
       total: response.data.total,
-    }
+    };
   },
 
   /**
@@ -77,9 +79,9 @@ export const projectService = {
    * @returns Project data
    */
   async getProject(id: string): Promise<Project> {
-    const response = await apiClient.get<ProjectResponseDTO>(`/projects/${id}`)
+    const response = await apiClient.get<ProjectResponseDTO>(`/projects/${id}`);
 
-    return transformProject(response.data)
+    return transformProject(response.data);
   },
 
   /**
@@ -89,14 +91,17 @@ export const projectService = {
    * @returns Created project
    */
   async createProject(title: string, description?: string): Promise<Project> {
-    const body: { title: string; description?: string } = { title }
+    const body: { title: string; description?: string } = { title };
     if (description) {
-      body.description = description
+      body.description = description;
     }
 
-    const response = await apiClient.post<ProjectResponseDTO>('/projects', body)
+    const response = await apiClient.post<ProjectResponseDTO>(
+      "/projects",
+      body,
+    );
 
-    return transformProject(response.data)
+    return transformProject(response.data);
   },
 
   /**
@@ -107,11 +112,14 @@ export const projectService = {
    */
   async updateProject(
     id: string,
-    data: { title?: string; description?: string }
+    data: { title?: string; description?: string },
   ): Promise<Project> {
-    const response = await apiClient.patch<ProjectResponseDTO>(`/projects/${id}`, data)
+    const response = await apiClient.patch<ProjectResponseDTO>(
+      `/projects/${id}`,
+      data,
+    );
 
-    return transformProject(response.data)
+    return transformProject(response.data);
   },
 
   /**
@@ -119,7 +127,7 @@ export const projectService = {
    * @param id - Project ID
    */
   async deleteProject(id: string): Promise<void> {
-    await apiClient.delete(`/projects/${id}`)
+    await apiClient.delete(`/projects/${id}`);
   },
 
   /**
@@ -128,9 +136,11 @@ export const projectService = {
    * @returns Restored project
    */
   async restoreProject(id: string): Promise<Project> {
-    const response = await apiClient.post<ProjectResponseDTO>(`/projects/${id}/restore`)
+    const response = await apiClient.post<ProjectResponseDTO>(
+      `/projects/${id}/restore`,
+    );
 
-    return transformProject(response.data)
+    return transformProject(response.data);
   },
 
   /**
@@ -138,8 +148,8 @@ export const projectService = {
    * @param id - Project ID
    */
   async permanentDeleteProject(id: string): Promise<void> {
-    await apiClient.delete(`/projects/${id}/permanent`)
+    await apiClient.delete(`/projects/${id}/permanent`);
   },
-}
+};
 
-export default projectService
+export default projectService;
