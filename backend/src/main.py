@@ -15,9 +15,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load .env file from project root (one level up from backend/src)
-_env_path = Path(__file__).resolve().parent.parent.parent / ".env"
-load_dotenv(_env_path)
+# Load .env file if it exists (for local development)
+# In production (Railway), environment variables are set directly
+_env_path = Path(__file__).resolve().parent.parent / ".env"
+if _env_path.exists():
+    load_dotenv(_env_path)
 
 from datetime import UTC, datetime
 from typing import Any
