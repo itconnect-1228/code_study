@@ -40,17 +40,28 @@ def get_app_settings() -> dict[str, Any]:
     Returns:
         dict: Application configuration settings.
     """
+    cors_origins_env = os.getenv("CORS_ORIGINS", "")
+
+    # Parse CORS origins from environment variable
+    if cors_origins_env:
+        cors_origins = [
+            origin.strip()
+            for origin in cors_origins_env.split(",")
+            if origin.strip()
+        ]
+    else:
+        # Default for local development
+        cors_origins = ["http://localhost:3000", "http://localhost:5173"]
+
+    # Log CORS configuration for debugging
+    logger.info(f"CORS_ORIGINS env: {cors_origins_env!r}")
+    logger.info(f"Parsed CORS origins: {cors_origins}")
+
     return {
         "app_name": os.getenv("APP_NAME", "AI Code Learning Platform"),
         "app_version": os.getenv("APP_VERSION", "1.0.0"),
         "debug": os.getenv("DEBUG", "false").lower() in ("true", "1", "yes"),
-        "cors_origins": [
-            origin.strip()
-            for origin in os.getenv(
-                "CORS_ORIGINS", "http://localhost:3000,http://localhost:5173"
-            ).split(",")
-            if origin.strip()
-        ],
+        "cors_origins": cors_origins,
     }
 
 
