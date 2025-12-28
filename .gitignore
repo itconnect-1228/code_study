@@ -16,6 +16,11 @@ __pycache__/
 
 # Environment
 .env
+.env.local
+.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.production
 .venv/
 venv/
 ENV/
