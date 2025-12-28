@@ -10,10 +10,19 @@ The app follows the factory pattern for easier testing and configuration.
 
 import logging
 import os
+import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+# Configure logging to stdout for Railway
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+print("=== Backend Starting ===", flush=True)
 
 # Load .env file if it exists (for local development)
 # In production (Railway), environment variables are set directly
@@ -94,7 +103,9 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI: Configured application instance.
     """
+    print("=== Creating FastAPI app ===", flush=True)
     settings = get_app_settings()
+    print(f"=== Settings loaded: CORS origins = {settings['cors_origins']} ===", flush=True)
 
     app = FastAPI(
         title=settings["app_name"],
@@ -102,6 +113,7 @@ def create_app() -> FastAPI:
         debug=settings["debug"],
         lifespan=lifespan,
     )
+    print("=== FastAPI instance created ===", flush=True)
 
     # Configure CORS middleware
     app.add_middleware(
@@ -111,6 +123,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    print("=== CORS middleware added ===", flush=True)
 
     # Register exception handlers
     add_exception_handlers(app)
