@@ -17,6 +17,8 @@ Security:
 - Refresh tokens implement rotation (single-use)
 """
 
+import os
+
 from fastapi import APIRouter, Cookie, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -41,9 +43,11 @@ REFRESH_TOKEN_COOKIE = "refresh_token"  # noqa: S105
 ACCESS_TOKEN_COOKIE = "access_token"  # noqa: S105
 COOKIE_MAX_AGE = 7 * 24 * 60 * 60  # 7 days in seconds
 ACCESS_COOKIE_MAX_AGE = 15 * 60  # 15 minutes
+# Cookie settings - detect production environment
+_is_production = bool(os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("PRODUCTION", "").lower() == "true")
 COOKIE_HTTPONLY = True
-COOKIE_SECURE = False  # Set to True in production with HTTPS
-COOKIE_SAMESITE = "lax"
+COOKIE_SECURE = _is_production  # True in production (HTTPS required)
+COOKIE_SAMESITE: str = "none" if _is_production else "lax"  # "none" for cross-origin
 
 
 @router.post("/register", response_model=TokenResponse, status_code=201)
