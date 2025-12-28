@@ -75,4 +75,4 @@ jobs:
         env:
           SECRET_KEY: test-secret-key-for-ci
           ENVIRONMENT: test
-        run: pytest tests/ -v --ignore=tests/unit/api/test_documents.py --deselect=tests/unit/api/test_auth.py::TestRegisterEndpoint::test_register_success --deselect=tests/unit/test_project_model.py::TestProjectUpdatedAt::test_update_project_updates_updated_at --deselect=tests/unit/test_project_service.py::TestProjectServiceUpdate::test_update_project_updates_updated_at
+        run: pytest tests/ -v --ignore=tests/unit/api/test_documents.py --deselect=tests/unit/api/test_auth.py::TestRegisterEndpoint::test_register_success --deselect=tests/unit/test_project_service.py::TestProjectServiceUpdate::test_update_project_updates_updated_at
