@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "npm install && npm run build"
 
 [deploy]
-startCommand = "node node_modules/vite/bin/vite.js preview --host 0.0.0.0 --port $PORT"
+startCommand = "npx serve dist -l $PORT"
 healthcheckPath = "/"
 healthcheckTimeout = 60
 restartPolicyType = "on_failure"
