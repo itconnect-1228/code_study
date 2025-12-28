@@ -14,6 +14,7 @@ Architecture Notes:
 - Supports multipart/form-data for file uploads
 """
 
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 from uuid import UUID
@@ -29,6 +30,7 @@ from src.services.code_analysis.code_upload_service import CodeUploadService
 from src.services.code_analysis.file_storage import FileStorageService
 from src.services.project_service import ProjectService
 from src.services.task_service import TaskService
+from src.utils.file_validator import validate_upload
 
 
 router = APIRouter(tags=["tasks"])
@@ -59,26 +61,37 @@ class TaskResponse(BaseModel):
     description: str | None
     upload_method: str | None
     deletion_status: str
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
 
 
+class TaskListResponse(BaseModel):
+    """Response schema for a list of tasks."""
+
+    tasks: list[TaskResponse]
+    total: int
+
+
 class CodeFileResponse(BaseModel):
-    """Response schema for a code file."""
+    """Response schema for a code file (Frontend format)."""
 
     id: UUID
-    file_name: str
-    file_path: str | None
-    file_extension: str | None
-    file_size_bytes: int | None
+    filename: str  # Frontend expects 'filename' not 'file_name'
+    relative_path: str | None = None  # Frontend expects 'relative_path'
+    content: str | None = None  # File content (read from storage)
+    language: str | None = None  # Programming language
+    line_count: int = 0  # Frontend expects 'line_count'
+    size_bytes: int | None = None  # Frontend expects 'size_bytes' not 'file_size_bytes'
 
     class Config:
         from_attributes = True
 
 
 class UploadedCodeResponse(BaseModel):
-    """Response schema for uploaded code with files."""
+    """Response schema for uploaded code with files (Full format)."""
 
     id: UUID
     detected_language: str | None
@@ -92,6 +105,13 @@ class UploadedCodeResponse(BaseModel):
         from_attributes = True
 
 
+class CodeFilesResponse(BaseModel):
+    """Response schema for code files list (Frontend format)."""
+
+    files: list[CodeFileResponse]
+    total: int
+
+
 # Storage configuration
 STORAGE_BASE_PATH = Path("storage")
 
@@ -101,12 +121,12 @@ def get_storage_service() -> FileStorageService:
     return FileStorageService(base_path=STORAGE_BASE_PATH)
 
 
-@router.get("/projects/{project_id}/tasks", response_model=list[TaskResponse])
+@router.get("/projects/{project_id}/tasks", response_model=TaskListResponse)
 async def list_tasks(
     project_id: UUID,
     db: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],
-) -> list[TaskResponse]:
+) -> TaskListResponse:
     """List all tasks for a project.
 
     Args:
@@ -115,7 +135,7 @@ async def list_tasks(
         current_user: Authenticated user.
 
     Returns:
-        List of tasks ordered by task_number.
+        TaskListResponse with tasks and total count.
 
     Raises:
         HTTPException 403: If user doesn't own the project.
@@ -131,7 +151,8 @@ async def list_tasks(
 
     task_service = TaskService(db)
     tasks = await task_service.get_by_project(project_id)
-    return [TaskResponse.model_validate(t) for t in tasks]
+    task_responses = [TaskResponse.model_validate(t) for t in tasks]
+    return TaskListResponse(tasks=task_responses, total=len(task_responses))
 
 
 @router.post(
@@ -198,7 +219,22 @@ async def create_task(
             detail="Task title must be at least 5 characters",
         )
 
-    # Create task
+    # Read and validate files BEFORE creating task
+    file_data: list[tuple[str, bytes]] = []
+    if files:
+        for f in files:
+            content = await f.read()
+            file_data.append((f.filename or "unnamed", content))
+
+        # Validate files
+        validation_result = validate_upload(file_data)
+        if not validation_result.is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=validation_result.error_message,
+            )
+
+    # Create task only after validation passes
     task_service = TaskService(db)
     try:
         task = await task_service.create(
@@ -213,16 +249,11 @@ async def create_task(
             detail=str(e),
         )
 
-    # Handle file uploads if present
-    if files or code:
+    # Handle file uploads if present (already validated)
+    if file_data or code:
         upload_service = CodeUploadService(db=db, storage=storage)
 
-        if files:
-            file_data = []
-            for f in files:
-                content = await f.read()
-                file_data.append((f.filename or "unnamed", content))
-
+        if file_data:
             await upload_service.upload_files(
                 user_id=current_user.id,
                 task_id=task.id,
@@ -357,12 +388,12 @@ async def delete_task(
         )
 
 
-@router.get("/tasks/{task_id}/code", response_model=UploadedCodeResponse)
+@router.get("/tasks/{task_id}/code", response_model=CodeFilesResponse)
 async def get_task_code(
     task_id: UUID,
     db: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],
-) -> UploadedCodeResponse:
+) -> CodeFilesResponse:
     """Get uploaded code files for a task.
 
     Args:
@@ -385,7 +416,7 @@ async def get_task_code(
             detail="Task not found",
         )
 
-    task = await task_service.get_by_id(task_id)
+    task = await task_service.get_by_id_with_code(task_id)
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -398,14 +429,33 @@ async def get_task_code(
             detail="No code uploaded for this task",
         )
 
-    return UploadedCodeResponse(
-        id=task.uploaded_code.id,
-        detected_language=task.uploaded_code.detected_language,
-        complexity_level=task.uploaded_code.complexity_level,
-        total_lines=task.uploaded_code.total_lines,
-        total_files=task.uploaded_code.total_files,
-        upload_size_bytes=task.uploaded_code.upload_size_bytes,
-        code_files=[
-            CodeFileResponse.model_validate(cf) for cf in task.uploaded_code.code_files
-        ],
+    # Build code file responses with content
+    code_file_responses = []
+    for cf in task.uploaded_code.code_files:
+        content = None
+        line_count = 0
+        try:
+            # Read file content from storage
+            storage_path = Path(cf.storage_path)
+            if storage_path.exists():
+                content = storage_path.read_text(encoding="utf-8")
+                line_count = len(content.splitlines())
+        except Exception:
+            pass  # Content will be None if read fails
+
+        code_file_responses.append(
+            CodeFileResponse(
+                id=cf.id,
+                filename=cf.file_name,  # Frontend format
+                relative_path=cf.file_path,  # Frontend format
+                content=content,
+                language=task.uploaded_code.detected_language,
+                line_count=line_count,  # Frontend format
+                size_bytes=cf.file_size_bytes,  # Frontend format
+            )
+        )
+
+    return CodeFilesResponse(
+        files=code_file_responses,
+        total=len(code_file_responses),
     )

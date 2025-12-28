@@ -3,19 +3,13 @@ import { FileCode, FolderOpen, ClipboardPaste, Clock, CheckCircle2, Loader2, Ale
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import type { Task } from '@/services/task-service'
 
 export type TaskStatus = 'pending' | 'generating' | 'completed' | 'error'
 export type UploadType = 'file' | 'folder' | 'paste'
 
-export interface Task {
-  id: string
-  taskNumber: number
-  title: string
-  status: TaskStatus
-  codeLanguage: string
-  uploadType: UploadType
-  createdAt: string
-}
+// Re-export Task type for backwards compatibility
+export type { Task }
 
 export interface TaskCardProps {
   task: Task
@@ -74,15 +68,14 @@ function formatDate(dateString: string): string {
  * TaskCard - Display a task in the timeline
  *
  * Features:
- * - Shows task number, title, status, language, upload type
- * - Visual status indicators
+ * - Shows task number, title, upload type
  * - Timeline connector for non-last items
  * - Click handler or link navigation
  */
 export function TaskCard({ task, onClick, isLast = false }: TaskCardProps) {
-  const status = statusConfig[task.status]
-  const uploadType = uploadTypeConfig[task.uploadType]
-  const StatusIcon = status.icon
+  // Get upload type config, fallback to 'file' if uploadMethod is null
+  const uploadMethod = task.uploadMethod || 'file'
+  const uploadType = uploadTypeConfig[uploadMethod]
   const UploadIcon = uploadType.icon
 
   const cardContent = (
@@ -101,9 +94,6 @@ export function TaskCard({ task, onClick, isLast = false }: TaskCardProps) {
               <span className="text-sm font-semibold text-primary">
                 Task {task.taskNumber}
               </span>
-              <Badge variant="outline" className="text-xs capitalize">
-                {task.codeLanguage}
-              </Badge>
             </div>
             <h3 className="text-base font-medium truncate">{task.title}</h3>
             <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
@@ -114,18 +104,6 @@ export function TaskCard({ task, onClick, isLast = false }: TaskCardProps) {
               <span>{formatDate(task.createdAt)}</span>
             </div>
           </div>
-          <Badge
-            variant="outline"
-            className={cn('flex items-center gap-1 shrink-0', status.className)}
-          >
-            <StatusIcon
-              className={cn(
-                'h-3.5 w-3.5',
-                task.status === 'generating' && 'animate-spin'
-              )}
-            />
-            <span>{status.label}</span>
-          </Badge>
         </div>
       </CardContent>
     </Card>

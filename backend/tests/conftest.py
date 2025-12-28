@@ -10,14 +10,16 @@ Note: SQLite is used for testing instead of PostgreSQL because:
 2. In-memory database is extremely fast
 3. Tests are isolated (fresh database per test)
 
-PostgreSQL-specific features (like regex constraints) are handled
-by removing incompatible constraints during test setup.
+PostgreSQL-specific features (like regex constraints, JSONB) are handled
+by removing incompatible constraints and type mapping during test setup.
 """
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.types import JSON
 
 from src.db.session import Base, get_session
 from src.main import create_app
@@ -25,11 +27,24 @@ from src.main import create_app
 # Import all models to ensure they're registered with Base.metadata
 # This must happen BEFORE Base.metadata.create_all is called
 from src.models.code_file import CodeFile  # noqa: F401
+from src.models.learning_document import LearningDocument  # noqa: F401
 from src.models.project import Project  # noqa: F401
 from src.models.refresh_token import RefreshToken  # noqa: F401
 from src.models.task import Task  # noqa: F401
 from src.models.user import User  # noqa: F401
 from src.models.uploaded_code import UploadedCode  # noqa: F401
+
+
+def _adapt_jsonb_for_sqlite():
+    """Replace JSONB with JSON type for SQLite compatibility.
+
+    SQLite doesn't support PostgreSQL's JSONB type, so we need to
+    convert it to the generic JSON type before creating tables.
+    """
+    for table in Base.metadata.tables.values():
+        for column in table.columns:
+            if isinstance(column.type, JSONB):
+                column.type = JSON()
 
 
 @pytest.fixture(scope="session")
@@ -104,6 +119,26 @@ async def db_session():
                 )
             )
         }
+
+    # Get the learning_documents table metadata if it exists
+    learning_documents_table = Base.metadata.tables.get("learning_documents")
+    if learning_documents_table is not None:
+        # Remove PostgreSQL-specific constraints that don't work in SQLite
+        learning_documents_table.constraints = {
+            c
+            for c in learning_documents_table.constraints
+            if not (
+                hasattr(c, "name")
+                and c.name
+                in (
+                    "valid_generation_status",
+                    "valid_content_structure",
+                )
+            )
+        }
+
+    # Convert JSONB to JSON for SQLite compatibility
+    _adapt_jsonb_for_sqlite()
 
     # Create all tables
     async with engine.begin() as conn:

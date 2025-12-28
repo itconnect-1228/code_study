@@ -33,6 +33,7 @@ from sqlalchemy.orm import selectinload
 
 from src.models.project import Project
 from src.models.task import Task
+from src.models.uploaded_code import UploadedCode
 
 
 class TaskService:
@@ -158,6 +159,45 @@ class TaskService:
                 print(f"Found: {task.title}")
         """
         stmt = select(Task).where(Task.id == task_id)
+
+        if not include_trashed:
+            stmt = stmt.where(Task.deletion_status == "active")
+
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_by_id_with_code(
+        self,
+        task_id: UUID,
+        include_trashed: bool = False,
+    ) -> Task | None:
+        """Get a task by ID with uploaded_code and code_files eagerly loaded.
+
+        This method uses eager loading to fetch the task along with its
+        associated uploaded_code and code_files in a single query. Use this
+        method when you need to access task.uploaded_code or its code_files
+        to avoid lazy loading issues in async context.
+
+        Args:
+            task_id: UUID of the task to retrieve.
+            include_trashed: If True, include trashed tasks. Default False.
+
+        Returns:
+            Task with uploaded_code and code_files loaded, or None if not found.
+
+        Example:
+            task = await service.get_by_id_with_code(task_id)
+            if task and task.uploaded_code:
+                for file in task.uploaded_code.code_files:
+                    print(f"File: {file.file_path}")
+        """
+        stmt = (
+            select(Task)
+            .options(
+                selectinload(Task.uploaded_code).selectinload(UploadedCode.code_files)
+            )
+            .where(Task.id == task_id)
+        )
 
         if not include_trashed:
             stmt = stmt.where(Task.deletion_status == "active")

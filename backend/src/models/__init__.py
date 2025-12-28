@@ -11,9 +11,10 @@ Current models:
 - Task: Single learning unit within a project
 - UploadedCode: Code upload metadata for a task
 - CodeFile: Individual file within uploaded code
+- LearningDocument: AI-generated 7-chapter educational content
 
 Example:
-    from backend.src.models import User, RefreshToken, Project, Task, UploadedCode, CodeFile
+    from backend.src.models import User, RefreshToken, Project, Task, UploadedCode, CodeFile, LearningDocument
     from backend.src.db import Base, get_session
 
     # Create a new user
@@ -50,9 +51,19 @@ Example:
     )
     session.add(code_file)
     await session.commit()
+
+    # Create a learning document for the task
+    document = LearningDocument(
+        task_id=task.id,
+        content={"chapter1": {...}, "chapter2": {...}, ...},
+        generation_status="completed"
+    )
+    session.add(document)
+    await session.commit()
 """
 
 from .code_file import CodeFile
+from .learning_document import LearningDocument
 from .project import Project
 from .refresh_token import RefreshToken
 from .task import Task
@@ -61,6 +72,7 @@ from .user import User
 
 __all__ = [
     "CodeFile",
+    "LearningDocument",
     "Project",
     "RefreshToken",
     "Task",

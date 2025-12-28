@@ -121,6 +121,25 @@ export const projectService = {
   async deleteProject(id: string): Promise<void> {
     await apiClient.delete(`/projects/${id}`)
   },
+
+  /**
+   * Restore a project from trash
+   * @param id - Project ID
+   * @returns Restored project
+   */
+  async restoreProject(id: string): Promise<Project> {
+    const response = await apiClient.post<ProjectResponseDTO>(`/projects/${id}/restore`)
+
+    return transformProject(response.data)
+  },
+
+  /**
+   * Permanently delete a project from trash
+   * @param id - Project ID
+   */
+  async permanentDeleteProject(id: string): Promise<void> {
+    await apiClient.delete(`/projects/${id}/permanent`)
+  },
 }
 
 export default projectService

@@ -14,8 +14,18 @@ Available Services:
   - validate_ownership: Authorization check for project access
 - UserService: User authentication and management (auth subpackage)
 - TokenService: JWT token management (auth subpackage)
+- GeminiClient: Google Gemini API wrapper (ai subpackage)
+  - generate: Generic content generation
+  - generate_document: 7-chapter learning document generation
+  - generate_qa_response: Q&A response generation
+- DocumentGenerationService: AI-powered learning document generation (document subpackage)
+  - generate_document: Generate 7-chapter learning document from code
+  - get_document_by_task: Retrieve document for a task
+  - get_generation_status: Get current generation status
+  - retry_failed_document: Retry failed generation
 """
 
 from src.services.project_service import ProjectService
+from src.services.document import DocumentGenerationService
 
-__all__ = ["ProjectService"]
+__all__ = ["ProjectService", "DocumentGenerationService"]

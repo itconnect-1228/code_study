@@ -114,8 +114,16 @@ export default function ProjectDetail() {
       toast.success(`"${newTask.title}" 태스크가 생성되었습니다.`)
       setShowCreateTaskModal(false)
     },
-    onError: () => {
-      toast.error('태스크 생성에 실패했습니다.')
+    onError: (error: unknown) => {
+      // Extract error message from backend response
+      let errorMessage = '태스크 생성에 실패했습니다. 다시 시도해주세요.'
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { detail?: string } } }
+        if (axiosError.response?.data?.detail) {
+          errorMessage = axiosError.response.data.detail
+        }
+      }
+      toast.error(errorMessage)
     },
   })
 

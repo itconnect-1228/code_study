@@ -18,6 +18,12 @@ bcrypt>=4.1.0
 celery>=5.3.0
 redis>=5.0.0
 
+# Code Analysis
+pygments>=2.17.0
+
+# AI/LLM Integration
+google-generativeai>=0.8.0
+
 # Development tools - Linting & Formatting
 ruff>=0.8.0
 black>=24.0.0

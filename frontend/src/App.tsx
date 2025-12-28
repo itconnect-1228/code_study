@@ -7,6 +7,7 @@ import TaskDetail from './pages/TaskDetail'
 import Trash from './pages/Trash'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/auth/ProtectedRoute'
+import Layout from './components/layout/Layout'
 
 function App() {
   return (
@@ -15,7 +16,9 @@ function App() {
         path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Layout>
+              <Dashboard />
+            </Layout>
           </ProtectedRoute>
         }
       />
@@ -25,7 +28,9 @@ function App() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Layout>
+              <Dashboard />
+            </Layout>
           </ProtectedRoute>
         }
       />
@@ -33,7 +38,9 @@ function App() {
         path="/projects/:id"
         element={
           <ProtectedRoute>
-            <ProjectDetail />
+            <Layout>
+              <ProjectDetail />
+            </Layout>
           </ProtectedRoute>
         }
       />
@@ -41,7 +48,9 @@ function App() {
         path="/tasks/:id"
         element={
           <ProtectedRoute>
-            <TaskDetail />
+            <Layout>
+              <TaskDetail />
+            </Layout>
           </ProtectedRoute>
         }
       />
@@ -49,7 +58,9 @@ function App() {
         path="/trash"
         element={
           <ProtectedRoute>
-            <Trash />
+            <Layout>
+              <Trash />
+            </Layout>
           </ProtectedRoute>
         }
       />

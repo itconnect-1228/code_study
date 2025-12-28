@@ -5,11 +5,12 @@ import { apiClient } from './api-client'
  */
 interface TaskResponseDTO {
   id: string
+  project_id: string
   task_number: number
   title: string
-  status: 'pending' | 'generating' | 'completed' | 'error'
-  code_language: string
-  upload_type: 'file' | 'folder' | 'paste'
+  description: string | null
+  upload_method: 'file' | 'folder' | 'paste' | null
+  deletion_status: string
   created_at: string
   updated_at: string
 }
@@ -39,11 +40,12 @@ interface CodeFilesResponseDTO {
  */
 export interface Task {
   id: string
+  projectId: string
   taskNumber: number
   title: string
-  status: 'pending' | 'generating' | 'completed' | 'error'
-  codeLanguage: string
-  uploadType: 'file' | 'folder' | 'paste'
+  description: string | null
+  uploadMethod: 'file' | 'folder' | 'paste' | null
+  deletionStatus: string
   createdAt: string
   updatedAt: string
 }
@@ -84,11 +86,12 @@ export interface TaskCreateData {
  */
 const transformTask = (dto: TaskResponseDTO): Task => ({
   id: dto.id,
+  projectId: dto.project_id,
   taskNumber: dto.task_number,
   title: dto.title,
-  status: dto.status,
-  codeLanguage: dto.code_language,
-  uploadType: dto.upload_type,
+  description: dto.description,
+  uploadMethod: dto.upload_method,
+  deletionStatus: dto.deletion_status,
   createdAt: dto.created_at,
   updatedAt: dto.updated_at,
 })

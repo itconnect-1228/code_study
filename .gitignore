@@ -1,0 +1,39 @@
+node_modules
+
+# Windows artifacts
+nul
+
+# Build outputs
+frontend/dist/
+frontend/@/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment
+.env
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+
+# Test artifacts
+.playwright-mcp/
+test_files/
+cookies.txt
+
+# Storage (production uses external volume)
+backend/storage/
+
+# pip install artifacts
+=*
+
+# Lock files (optional - keep if you want reproducible builds)
+# uv.lock

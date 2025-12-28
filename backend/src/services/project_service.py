@@ -119,7 +119,7 @@ class ProjectService:
 
         self.db.add(project)
         await self.db.commit()
-        await self.db.refresh(project)
+        # refresh 불필요 - expire_on_commit=False이므로 객체가 이미 유효함
 
         return project
 
@@ -232,7 +232,7 @@ class ProjectService:
             project.description = description
 
         await self.db.commit()
-        await self.db.refresh(project)
+        # refresh 불필요 - expire_on_commit=False이므로 객체가 이미 유효함
 
         return project
 
@@ -268,9 +268,75 @@ class ProjectService:
         project.soft_delete()
 
         await self.db.commit()
-        await self.db.refresh(project)
+        # refresh 불필요 - expire_on_commit=False이므로 객체가 이미 유효함
 
         return project
+
+    async def restore(self, project_id: UUID) -> Project:
+        """Restore a project from trash.
+
+        Restores a trashed project back to active status.
+        Clears all trash-related timestamps.
+
+        Args:
+            project_id: UUID of the project to restore.
+
+        Returns:
+            Project: The restored project object.
+
+        Raises:
+            ValueError: If project is not found.
+            ValueError: If project is not in trash.
+
+        Example:
+            restored = await service.restore(project.id)
+            print(f"Project restored: {restored.title}")
+        """
+        # Get project including trashed to find it
+        project = await self.get_by_id(project_id, include_trashed=True)
+        if not project:
+            raise ValueError(f"Project with id {project_id} not found")
+
+        if not project.is_trashed:
+            raise ValueError(f"Project with id {project_id} is not in trash")
+
+        # Use the model's restore method
+        project.restore()
+
+        await self.db.commit()
+
+        return project
+
+    async def permanent_delete(self, project_id: UUID) -> None:
+        """Permanently delete a project from the database.
+
+        This action is irreversible. The project must be in trash before
+        it can be permanently deleted.
+
+        Args:
+            project_id: UUID of the project to permanently delete.
+
+        Raises:
+            ValueError: If project is not found.
+            ValueError: If project is not in trash (must be trashed first).
+
+        Example:
+            await service.permanent_delete(project.id)
+            # Project is now permanently deleted
+        """
+        # Get project including trashed to find it
+        project = await self.get_by_id(project_id, include_trashed=True)
+        if not project:
+            raise ValueError(f"Project with id {project_id} not found")
+
+        if not project.is_trashed:
+            raise ValueError(
+                f"Project with id {project_id} must be in trash before permanent deletion"
+            )
+
+        # Delete permanently
+        await self.db.delete(project)
+        await self.db.commit()
 
     async def validate_ownership(
         self,

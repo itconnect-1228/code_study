@@ -8,9 +8,17 @@ This module initializes the FastAPI application with:
 The app follows the factory pattern for easier testing and configuration.
 """
 
-import contextlib
+import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Load .env file from project root (one level up from backend/src)
+_env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+load_dotenv(_env_path)
+
 from datetime import UTC, datetime
 from typing import Any
 
@@ -20,6 +28,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from .api import api_router
 from .api.exceptions import add_exception_handlers
 from .db.session import close_db, init_db
+
+logger = logging.getLogger(__name__)
 
 
 def get_app_settings() -> dict[str, Any]:
@@ -53,9 +63,11 @@ async def lifespan(app: FastAPI):
         app: The FastAPI application instance.
     """
     # Startup: Initialize database connection
-    # Database initialization is optional - it may fail if DB is not available (e.g., during testing)
-    with contextlib.suppress(Exception):
+    try:
         init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
 
     yield
 

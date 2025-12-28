@@ -158,6 +158,14 @@ class Task(Base):
         cascade="all, delete-orphan",
     )
 
+    # Relationship to LearningDocument (one-to-one)
+    learning_document = relationship(
+        "LearningDocument",
+        back_populates="task",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
     # Table-level constraints and indexes
     __table_args__ = (
         # Title minimum length constraint (PostgreSQL)

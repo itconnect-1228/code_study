@@ -25,11 +25,13 @@ MIN_FILE_COUNT = 1  # FR-018
 MAX_FILE_COUNT = 20  # FR-018
 
 # Allowed file extensions (FR-015)
-# Extended to include common code file types beyond the spec minimum
+# Must match SUPPORTED_EXTENSIONS in CodeFile model
 ALLOWED_EXTENSIONS: set[str] = {
-    # Specified in FR-015
     ".py",    # Python
     ".js",    # JavaScript
+    ".ts",    # TypeScript
+    ".jsx",   # JavaScript React
+    ".tsx",   # TypeScript React
     ".html",  # HTML
     ".css",   # CSS
     ".java",  # Java
@@ -37,29 +39,6 @@ ALLOWED_EXTENSIONS: set[str] = {
     ".c",     # C
     ".txt",   # Text
     ".md",    # Markdown
-    # Additional common code file types
-    ".ts",    # TypeScript
-    ".tsx",   # TypeScript React
-    ".jsx",   # JavaScript React
-    ".json",  # JSON
-    ".xml",   # XML
-    ".yaml",  # YAML
-    ".yml",   # YAML alternative
-    ".sql",   # SQL
-    ".sh",    # Shell script
-    ".bash",  # Bash script
-    ".h",     # C/C++ header
-    ".hpp",   # C++ header
-    ".go",    # Go
-    ".rs",    # Rust
-    ".rb",    # Ruby
-    ".php",   # PHP
-    ".swift", # Swift
-    ".kt",    # Kotlin
-    ".scala", # Scala
-    ".r",     # R
-    ".vue",   # Vue.js
-    ".svelte", # Svelte
 }
 
 # Excluded paths/patterns (FR-017)

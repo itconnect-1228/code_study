@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.dependencies import get_current_user
-from src.api.exceptions import AuthorizationException, NotFoundException
+from src.api.exceptions import AuthorizationException, NotFoundException, ValidationException
 from src.api.schemas import (
     CreateProjectRequest,
     ProjectListResponse,
@@ -83,11 +83,17 @@ async def create_project(
         ValidationException: If title is empty (422).
     """
     project_service = ProjectService(db)
-    project = await project_service.create(
-        user_id=current_user.id,
-        title=request.title,
-        description=request.description,
-    )
+    try:
+        project = await project_service.create(
+            user_id=current_user.id,
+            title=request.title,
+            description=request.description,
+        )
+    except ValueError as e:
+        raise ValidationException(
+            message=str(e),
+            code="INVALID_PROJECT_DATA",
+        )
 
     return ProjectResponse.from_project(project)
 
@@ -186,6 +192,59 @@ async def update_project(
     return ProjectResponse.from_project(updated_project)
 
 
+@router.post("/{project_id}/restore", response_model=ProjectResponse)
+async def restore_project(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),  # noqa: B008
+    db: AsyncSession = Depends(get_session),  # noqa: B008
+) -> ProjectResponse:
+    """Restore a project from trash.
+
+    Restores the project from trash back to active status.
+    The user must own the project.
+
+    Args:
+        project_id: UUID of the project to restore.
+        current_user: Authenticated user (injected).
+        db: Database session (injected).
+
+    Returns:
+        ProjectResponse: The restored project.
+
+    Raises:
+        NotFoundException: If project doesn't exist (404).
+        AuthorizationException: If user doesn't own the project (403).
+        ValidationException: If project is not in trash (400).
+    """
+    project_service = ProjectService(db)
+
+    # Check if project exists (including trashed)
+    project = await project_service.get_by_id(project_id, include_trashed=True)
+    if not project:
+        raise NotFoundException(
+            message="Project not found",
+            code="PROJECT_NOT_FOUND",
+        )
+
+    # Check ownership
+    if project.user_id != current_user.id:
+        raise AuthorizationException(
+            message="You do not have permission to restore this project",
+            code="ACCESS_DENIED",
+        )
+
+    # Restore project
+    try:
+        restored_project = await project_service.restore(project_id)
+    except ValueError as e:
+        raise ValidationException(
+            message=str(e),
+            code="RESTORE_ERROR",
+        )
+
+    return ProjectResponse.from_project(restored_project)
+
+
 @router.delete("/{project_id}", status_code=204)
 async def delete_project(
     project_id: UUID,
@@ -229,5 +288,59 @@ async def delete_project(
 
     # Soft delete project
     await project_service.soft_delete(project_id)
+
+    return Response(status_code=204)
+
+
+@router.delete("/{project_id}/permanent", status_code=204)
+async def permanent_delete_project(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),  # noqa: B008
+    db: AsyncSession = Depends(get_session),  # noqa: B008
+) -> Response:
+    """Permanently delete a project from trash.
+
+    Permanently removes the project from the database. This action is
+    irreversible. The project must be in trash before it can be
+    permanently deleted.
+
+    Args:
+        project_id: UUID of the project to permanently delete.
+        current_user: Authenticated user (injected).
+        db: Database session (injected).
+
+    Returns:
+        Response: 204 No Content on success.
+
+    Raises:
+        NotFoundException: If project doesn't exist (404).
+        AuthorizationException: If user doesn't own the project (403).
+        ValidationException: If project is not in trash (400).
+    """
+    project_service = ProjectService(db)
+
+    # Check if project exists (including trashed)
+    project = await project_service.get_by_id(project_id, include_trashed=True)
+    if not project:
+        raise NotFoundException(
+            message="Project not found",
+            code="PROJECT_NOT_FOUND",
+        )
+
+    # Check ownership
+    if project.user_id != current_user.id:
+        raise AuthorizationException(
+            message="You do not have permission to delete this project",
+            code="ACCESS_DENIED",
+        )
+
+    # Permanent delete
+    try:
+        await project_service.permanent_delete(project_id)
+    except ValueError as e:
+        raise ValidationException(
+            message=str(e),
+            code="DELETE_ERROR",
+        )
 
     return Response(status_code=204)
